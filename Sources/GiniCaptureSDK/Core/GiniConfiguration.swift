@@ -235,6 +235,21 @@ import UIKit
     @objc public var cameraPreviewCornerGuidesColor = UIColor.white
     
     /**
+     Sets the background color of camera container view.
+     */
+    @objc public var cameraContainerViewBackgroundColor = GiniColor(lightModeColor: .black, darkModeColor: .black)
+    
+    /**
+     Sets the color of camera preview frame.
+     */
+    @objc public var cameraPreviewFrameColor = GiniColor(lightModeColor: UIColor(white: 0.0, alpha: 0.7), darkModeColor: UIColor(white: 0.0, alpha: 0.7))
+    
+    /**
+     Sets the background color of camera buttons view.
+     */
+    @objc public var cameraButtonsViewBackgroundColor = GiniColor(lightModeColor: .black, darkModeColor: .black)
+    
+    /**
      Set the types supported by the file import feature. `GiniCaptureImportFileTypes.none` by default.
      */
     @objc public var fileImportSupportedTypes: GiniCaptureImportFileTypes = .none
@@ -607,6 +622,16 @@ import UIKit
      Sets the color of the bottom button to the specified color.
      */
     @objc public var noResultsBottomButtonColor = Colors.Gini.blue
+    
+    /**
+     Sets the text color of the bottom button to the specified color.
+     */
+    @objc public var noResultsBottomButtonTextColor = GiniColor.init(lightModeColor: .white, darkModeColor: .white)
+    
+    /**
+     Sets the corner radius of the bottom button.
+     */
+    @objc public var noResultsBottomButtonCornerRadius: CGFloat = 0.0
     
     /**
      Sets the color of the warning container background to the specified color.
