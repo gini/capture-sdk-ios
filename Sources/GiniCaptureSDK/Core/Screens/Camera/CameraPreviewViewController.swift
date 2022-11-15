@@ -11,8 +11,11 @@ import AVFoundation
 protocol CameraPreviewViewControllerDelegate: AnyObject {
     func cameraPreview(_ viewController: CameraPreviewViewController,
                        didDetect qrCodeDocument: GiniQRCodeDocument)
+    func cameraPreview(_ viewController: CameraPreviewViewController,
+                       didDetectInvalid qrCodeDocument: GiniQRCodeDocument)
     func cameraDidSetUp(_ viewController: CameraPreviewViewController,
                         camera: CameraProtocol)
+    func notAuthorized()
 }
 
 final class CameraPreviewViewController: UIViewController {
@@ -25,6 +28,10 @@ final class CameraPreviewViewController: UIViewController {
         set {
             camera.isFlashOn = newValue
         }
+    }
+    
+    var isFlashSupported: Bool {
+        return camera.isFlashSupported && giniConfiguration.flashToggleEnabled
     }
     
     private lazy var spinner: UIActivityIndicatorView = {
@@ -58,6 +65,8 @@ final class CameraPreviewViewController: UIViewController {
         return UIImageNamedPreferred(named: "cameraDefaultDocumentImage")
     }
 
+    var isAuthorized = false
+
     lazy var previewView: CameraPreviewView = {
         let previewView = CameraPreviewView()
         previewView.translatesAutoresizingMaskIntoConstraints = false
@@ -86,7 +95,6 @@ final class CameraPreviewViewController: UIViewController {
     override func loadView() {
         super.loadView()
         view.translatesAutoresizingMaskIntoConstraints = false
-
         previewView.session = camera.session
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(subjectAreaDidChange),
@@ -100,11 +108,6 @@ final class CameraPreviewViewController: UIViewController {
         addLoadingIndicator()
     }
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        updatePreviewViewOrientation() // Video orientation should be updated once the view has been loaded
-    }
-    
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         camera.start()
@@ -130,6 +133,10 @@ final class CameraPreviewViewController: UIViewController {
     }
     
     func captureImage(completion: @escaping (Data?, CameraError?) -> Void) {
+        guard isAuthorized == true else {
+            completion(nil, CameraError.notAuthorizedToUseDevice)
+            return
+        }
         if giniConfiguration.debugModeOn {
             // Retrieves the image from default image view to make sure the image
             // was set and therefore the correct states were checked before.
@@ -168,24 +175,35 @@ final class CameraPreviewViewController: UIViewController {
             if let error = error {
                 switch error {
                 case .notAuthorizedToUseDevice:
+                    self.isAuthorized = false
                     self.addNotAuthorizedView()
+                    self.delegate?.notAuthorized()
                 default:
                     if self.giniConfiguration.debugModeOn {
                         #if targetEnvironment(simulator)
+                        self.isAuthorized = true
                         self.addDefaultImage()
                         #endif
+                    } else {
+                        self.isAuthorized = false
                     }
                 }
             } else {
+                self.isAuthorized = true
                 self.delegate?.cameraDidSetUp(self, camera: self.camera)
             }
+            
             self.stopLoadingIndicator()
         }
-        
+
         if giniConfiguration.qrCodeScanningEnabled {
             camera.didDetectQR = { [weak self] qrDocument in
                 guard let self = self else { return }
                 self.delegate?.cameraPreview(self, didDetect: qrDocument)
+            }
+            camera.didDetectInvalidQR = { [weak self] qrDocument in
+                guard let self = self else { return }
+                self.delegate?.cameraPreview(self, didDetectInvalid: qrDocument)
             }
         }
     }
@@ -202,22 +220,16 @@ final class CameraPreviewViewController: UIViewController {
         spinner.stopAnimating()
     }
 
-}
-
-// MARK: - Fileprivate
-
-fileprivate extension CameraPreviewViewController {
-    
     func updatePreviewViewOrientation() {
         let orientation: AVCaptureVideoOrientation
         if UIDevice.current.isIpad {
-            orientation =  interfaceOrientationsMapping[UIApplication.shared.statusBarOrientation] ?? .portrait
+            orientation = interfaceOrientationsMapping[UIApplication.shared.statusBarOrientation] ?? .portrait
         } else {
             orientation = .portrait
         }
-        
-        let previewLayer = (self.previewView.layer as? AVCaptureVideoPreviewLayer)
-        previewLayer?.connection?.videoOrientation = orientation
+        if let cameraLayer = previewView.layer as? AVCaptureVideoPreviewLayer {
+            cameraLayer.connection?.videoOrientation = orientation
+        }
     }
 }
 
@@ -231,6 +243,7 @@ extension CameraPreviewViewController {
         super.view.addSubview(view)
         
         view.translatesAutoresizingMaskIntoConstraints = false
+        
         Constraints.active(item: view, attr: .width, relatedBy: .equal, to: super.view, attr: .width)
         Constraints.active(item: view, attr: .height, relatedBy: .equal, to: super.view, attr: .height)
         Constraints.active(item: view, attr: .centerX, relatedBy: .equal, to: super.view, attr: .centerX)
