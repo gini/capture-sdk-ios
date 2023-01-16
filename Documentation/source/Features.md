@@ -1,9 +1,9 @@
 Features
 =========
 
-The Gini Capture SDK provides various features you can enable and configure. All the features are configured during
-through `GiniConfiguration.shared` instance. Specifically the `GiniConfiguration` is used to configure the Gini
-Capture SDK.
+The Gini Capture SDK provides various features you can enable and configure.
+All the features are configured during through `GiniConfiguration.shared` instance.
+Specifically the `GiniConfiguration` is used to configure the Gini Capture SDK.
 
 **Note**: Some features require additional contractual agreements and may not be used without prior confirmation. Please get in touch with us in case you are not sure which features your contract includes.
 
@@ -32,7 +32,8 @@ You can opt to show a bottom navigation bar. To enable it pass `true` to
 `GiniConfiguration.shared.bottomNavigationBarEnabled`.
 
 **Note**:  The top navigation bar will still be used, but its  functionality will be limited to showing the screen's title and
-an optional close button. Please inject a custom top navigation bar if your design requires it even if you have enabled the bottom navigation bar.
+an optional close button.
+Please inject a custom top navigation bar if your design requires it even if you have enabled the bottom navigation bar.
 
 ## Onboarding
 
@@ -45,25 +46,31 @@ You can customize the onboarding in the following ways:
    `GiniConfiguration.shared.onboardingShowAtFirstLaunch`.
 
 * Customize the onboarding pages:
-   If you wish to show different onboarding pages then pass a list of `OnboardingPageNew` structs to `GiniConfiguration.shared.customOnboardingPages`.
+   If you wish to show different onboarding pages then pass a list of `OnboardingPage` structs to `GiniConfiguration.shared.customOnboardingPages`.
 
 * Force show the onboarding:
    If you wish to show the onboarding after the first run then pass `true` to
    `GiniConfiguration.shared.onboardingShowAtLaunch`.
 
 * Animate illustrations by injecting custom views:
-   If you need to animate the illustrations on the onboarding pages implement the `OnboardingIllustrationAdapter` interface to inject a view that can animate images (e.g., `Lottie`) and pass it to the relevant onboarding illustration adapter setters (e.g., `onboardingAlignCornersIllustrationAdapter`,`onboardingLightingIllustrationAdapter`,`onboardingMultiPageIllustrationAdapter`,`onboardingQRCodeIllustrationAdapter`) when configuring the `GiniConfiguration.shared` instance.
+   If you need to animate the illustrations on the onboarding pages implement the `OnboardingIllustrationAdapter` interface to inject a view that can animate images (e.g., `Lottie`) and pass it to the relevant onboarding illustration adapter setters (e.g., `onboardingAlignCornersIllustrationAdapter`,
+   `onboardingLightingIllustrationAdapter`,
+   `onboardingMultiPageIllustrationAdapter`,
+   `onboardingQRCodeIllustrationAdapter`)
+    when configuring the `GiniConfiguration.shared` instance.
 
 ## Single Page
 
-By default, the Gini Capture SDK is configured to capture single page documents. No further configuration is required for
-this.
+By default, the Gini Capture SDK is configured to capture single page documents.
+No further configuration is required for this.
 
 ## Multi-Page
 
 The multi-page feature allows the SDK to capture documents with multiple pages.
 
 To enable this simply pass `true` to `GiniConfiguration.shared.multipageEnabled`.
+
+`Add pages button` will be shown on the Review screen only if multi-page is enabled.
 
 ## Camera
 
@@ -76,11 +83,17 @@ To enable this simply pass `true` to `GiniConfiguration.shared.multipageEnabled`
  # QR Code Scanning
 
 When a supported QR code is detected with valid payment data, the QR Code will be processed automatically without any further user interaction.
-The QR Code scanning maybe triggered directly without the need to analyze the document.
+The QR Code scanning may be triggered directly without the need to analyze the document.
 
 If the QR code does not have a supported payment format then a popup informs the user that a QR code was detected, but it cannot be used.
 
 Please find more information in the [QR Code scanning guide](https://developer.gini.net/gini-mobile-ios/GiniCaptureSDK/qr-code-scanning-guide.html).
+
+## QR Code Only
+
+During QR Code only mode the capture and import controls will be hidden from the camera screen.
+
+For enabling QR code only mode the both flags `GiniConfiguration.shared.qrCodeScanningEnabled` and `GiniConfiguration.shared.onlyQRCodeScanningEnabled` should be `true`.
 
 # Document Import
 
@@ -106,6 +119,7 @@ You can pass the title and view controller for each screen to the
 
         configuration.customMenuItems = [customMenuItem]
  ```           
+The example implementation is availible [here](https://github.com/gini/gini-mobile-ios/tree/new-ui/CaptureSDK/GiniCaptureSDKExample/Example%20Swift).
 
 You can also disable the supported formats help screen by passing `false` to
 `GiniConfiguration.shared.shouldShowSupportedFormatsScreen`.

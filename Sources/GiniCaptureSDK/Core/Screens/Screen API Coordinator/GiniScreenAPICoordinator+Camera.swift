@@ -152,17 +152,11 @@ extension GiniScreenAPICoordinator: CameraViewControllerDelegate {
     private func showOnboardingScreen(
         cameraViewController: CameraScreen,
         completion: @escaping () -> Void) {
-        cameraViewController.hideCameraOverlay()
         cameraViewController.hideCaptureButton()
 
         let vc = OnboardingViewController()
-        cameraViewController.showCameraOverlay()
         cameraViewController.showCaptureButton()
-        if giniConfiguration.fileImportSupportedTypes != GiniConfiguration.GiniCaptureImportFileTypes.none {
-            // TODO: remove cameraViewController.showFileImportTip()
-        } else if giniConfiguration.qrCodeScanningEnabled {
-            // TODO: removecameraViewController.showQrCodeTip()
-        }
+
         completion()
         let navigationController = UINavigationController(rootViewController: vc)
         if giniConfiguration.customNavigationController == nil {
@@ -330,14 +324,12 @@ extension GiniScreenAPICoordinator: UploadDelegate {
             guard let self = self else { return }
             self.update(document, withError: error, isUploaded: false)
 
-            if document.type != .image || !self.giniConfiguration.multipageEnabled {
-                let errorLog = ErrorLog(
-                    description: String(describing: error),
-                    error: error)
-                self.giniConfiguration.errorLogger.handleErrorLog(error: errorLog)
-                guard let giniError = error as? GiniError, giniError != .requestCancelled else { return }
-                self.displayError(errorType: ErrorType(error: giniError), animated: true)
-            }
+            let errorLog = ErrorLog(
+                description: String(describing: error),
+                error: error)
+            self.giniConfiguration.errorLogger.handleErrorLog(error: errorLog)
+            guard let giniError = error as? GiniError, giniError != .requestCancelled else { return }
+            self.displayError(errorType: ErrorType(error: giniError), animated: true)
         }
     }
 }

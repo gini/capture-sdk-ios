@@ -38,7 +38,6 @@
 "ginicapture.camera.documentValidationError.tooManyPages" = "Das Dokument darf nicht mehr als 10 Seiten haben.";
 "ginicapture.camera.documentValidationError.wrongFormat" = "Nur Dateien vom Format jpg, png, gif oder pdf können analysiert werden.";
 "ginicapture.camera.documentValidationError.pdfPasswordProtected" = "Passwortgeschützte Dokumente können nicht analysiert werden.";
-"ginicapture.camera.fileImportTip" = "Es können jetzt auch ganz einfach Dateien hochgeladen werden.";
 "ginicapture.camera.fileImportButtonLabel" = "Dateien";
 "ginicapture.camera.flashButtonLabel.On.Voice.Over" = "Blitz an";
 "ginicapture.camera.flashButtonLabel.Off.Voice.Over" = "Blitz aus";
@@ -47,7 +46,6 @@
 "ginicapture.camera.thumbnail.Voice.Over" = "Foto vorschaubild";
 "ginicapture.camera.capturebutton" = "Bild Aufnehmen";
 "ginicapture.camera.infoLabel" = "Rechnung oder QR Code scannen";
-"ginicapture.camera.qrCodeTip" = "Haben Sie schon den QR-Codeleser ausprobiert?";
 "ginicapture.camera.capturedImagesStackLabel" = "Erfasste Dokumente";
 "ginicapture.camera.qrCodeDetectedPopup.message" = "QR verwenden?";
 "ginicapture.camera.unsupportedQrCodeDetectedPopup.message" = "Dieser QR-Code enthält keine Bezahlinformationen.";
@@ -82,9 +80,6 @@
 "ginicapture.onboarding.multiPages.description"  = "Es ist möglich mehrer Seiten eines Dokuments zu Scannen";
 "ginicapture.onboarding.qrCode.title"  = "QR Codes scannen";
 "ginicapture.onboarding.qrCode.description"  = "QR Codes werden automatisch erkannt und analysiert";
-"ginicapture.review.top"                = "Dokument vollständig, scharf und in Leserichtung?";
-"ginicapture.review.bottom"             = "Doppeltippen um Schärfe zu prüfen";
-"ginicapture.review.rotateButton"       = "Dokument drehen";
 "ginicapture.review.documentImageTitle" = "Dokument";
 "ginicapture.review.unknownError"       = "Auf dem Überprüfungsbildschirm ist ein unbekannter Fehler aufgetreten";
 
@@ -92,7 +87,6 @@
 "ginicapture.analysis.loadingText" = "Dokument wird analysiert";
 "ginicapture.analysis.loadingText.pdf" = "%@\nwird analysiert";
 "ginicapture.analysis.section.header" = "Nützliche Tipps";
-"ginicapture.analysis.suggestion.header" = "Um schneller Ergebnisse zu erhalten, bitte:";
 "ginicapture.analysis.suggestion.1" = "Gute Lichtverhältnisse";
 "ginicapture.analysis.suggestion.1.details" = "Gutes Licht führt zu besseren Ergebnissen als mit Blitz";
 
@@ -127,7 +121,7 @@
 "ginicapture.noresults.title" = "Tipps";
 "ginicapture.noresults.warningHelpMenu" = "Zur Erkennung aller Daten bitte folgende Tipps beim Abfotografieren beachten:";
 
-"ginicapture.noresult.enterManually" = "Zahlungsdaten manuell eingeben";
+"ginicapture.noresult.enterManually" = "Manuell ausfüllen";
 "ginicapture.noresult.retakeImages" = "Foto wiederholen";
 
 "ginicapture.noresult.title" = "Keine Ergebnisse";
