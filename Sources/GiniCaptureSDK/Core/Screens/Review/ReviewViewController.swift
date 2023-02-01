@@ -326,9 +326,10 @@ extension ReviewViewController {
         } else {
             if resetToEnd {
                 resetToEnd = false
-                setCellStatus(for: currentPage, isActive: true)
             }
+            setCellStatus(for: currentPage, isActive: true)
         }
+        collectionView.reloadData()
     }
 
     public override func viewWillLayoutSubviews() {
@@ -469,6 +470,8 @@ extension ReviewViewController {
 
 extension ReviewViewController {
     private func addConstraints() {
+        collectionViewHeightConstraint.priority = .defaultLow
+
         NSLayoutConstraint.activate(tipLabelConstraints)
         NSLayoutConstraint.activate(collectionViewConstraints)
         NSLayoutConstraint.activate(pageControlConstraints)

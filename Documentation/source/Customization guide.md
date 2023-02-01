@@ -95,15 +95,15 @@ To enable this feature simply pass `true` to `GiniConfiguration.shared.multipage
 
 ### Camera
 
-* Enable the flash toggle button:
-   To allow users toggle the camera flash pass `true` to `GiniConfiguration.shared.flashToggleEnabled`.
+- Enable the flash toggle button:
+To allow users toggle the camera flash pass `true` to `GiniConfiguration.shared.flashToggleEnabled`.
 
-* Turn off flash by default:
-   Flash is on by default, and you can turn it off by passing `false` to `GiniConfiguration.shared.flashOnByDefault`.
+- Turn off flash by default:
+Flash is on by default, and you can turn it off by passing `false` to `GiniConfiguration.shared.flashOnByDefault`.
 
 ### Camera access TODO
 
- ### QR Code Scanning
+### QR Code Scanning
 
 When a supported QR code is detected with valid payment data, the QR Code will be processed automatically without any further user interaction.
 The QR Code scanning may be triggered directly without the need to analyze the document.
@@ -138,7 +138,7 @@ Please find more information in the [Import PDFs and images guide](https://devel
 You can show a custom loading indicator with custom animation support on the process button.
 Your custom loading indicator should implement `OnButtonLoadingIndicatorAdapter` interface and be passed  to `GiniConfiguration.shared.onButtonLoadingIndicator`.
 
-The example implementation is available [here](https://github.com/gini/gini-mobile-ios/blob/GiniCaptureSDK%3B3.0.0-beta02/BankSDK/GiniBankSDKExample/GiniBankSDKExample/CustomLoadingIndicator.swift#L36).
+The example implementation is available [here](https://github.com/gini/gini-mobile-ios/blob/GiniCaptureSDK%3B3.0.0-beta03/BankSDK/GiniBankSDKExample/GiniBankSDKExample/CustomLoadingIndicator.swift#L36).
 
 ## Analysis screen
 
@@ -147,7 +147,7 @@ The example implementation is available [here](https://github.com/gini/gini-mobi
 You can show a custom loading indicator with custom animation support.
 Your custom loading indicator should implement `CustomLoadingIndicatorAdapter` interface and be passed  to `GiniConfiguration.shared.customLoadingIndicator`.
 
-The example implementation is available [here](https://github.com/gini/gini-mobile-ios/blob/GiniCaptureSDK%3B3.0.0-beta02/BankSDK/GiniBankSDKExample/GiniBankSDKExample/CustomLoadingIndicator.swift).
+The example implementation is available [here](https://github.com/gini/gini-mobile-ios/blob/GiniCaptureSDK%3B3.0.0-beta03/BankSDK/GiniBankSDKExample/GiniBankSDKExample/CustomLoadingIndicator.swift).
 
 ## Help screens
 
@@ -173,10 +173,20 @@ You can also disable the supported formats help screen by passing `false` to
 
 <iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="600" height="450" src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Ffile%2F1985HMF83siAXmysSn3dC6%2FiOS-Gini-Capture-SDK-3.0.0-UI-Customisation%3Fnode-id%3D279%253A7588%26t%3DcRAvcUKVlwGtGpuh-1" allowfullscreen></iframe>
 
-## No result screen TODO
+## No result screen
 
 <iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="600" height="450" src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Ffile%2F1985HMF83siAXmysSn3dC6%2FiOS-Gini-Capture-SDK-3.0.0-UI-Customisation%3Fnode-id%3D263%253A6989%26t%3DcRAvcUKVlwGtGpuh-1" allowfullscreen></iframe>
 
-# Error screen TODO
+You can show your own UI for data input if an error occurred and the user clicks the "Enter manually" button on the error screen.
+For this you must to implement `GiniCaptureResultsDelegate.giniCaptureDidEnterManually() `.
+
+You can show a bottom navigation bar by passing true to `GiniConfiguration.shared.bottomNavigationBarEnabled`. There is a default implementation, but you can also use
+your own by implementing the `NoResultBottomNavigationBarAdapter` interface and passing it to `GiniConfiguration.shared.noResultNavigationBarBottomAdapter`.
+
+You can find more details [here](https://developer.gini.net/gini-mobile-ios/GiniCaptureSDK/3.0.0-beta03/features.html#no-result-screen-customization).
+
+## Error screen
 
 <iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="600" height="450" src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Ffile%2F1985HMF83siAXmysSn3dC6%2FiOS-Gini-Capture-SDK-3.0.0-UI-Customisation%3Fnode-id%3D263%253A6858%26t%3DcRAvcUKVlwGtGpuh-1" allowfullscreen></iframe>
+
+You can find more details [here](https://developer.gini.net/gini-mobile-ios/GiniCaptureSDK/3.0.0-beta03/features.html#error-screen-customization).

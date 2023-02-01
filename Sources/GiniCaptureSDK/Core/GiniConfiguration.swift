@@ -108,7 +108,8 @@ import GiniBankAPILibrary
             ButtonConfiguration(backgroundColor: .GiniCapture.dark4,
                                 borderColor: GiniColor(light: UIColor.GiniCapture.light6,
                                                       dark: UIColor.clear).uiColor(),
-                                titleColor: .GiniCapture.accent1,
+                                titleColor: GiniColor(light: UIColor.GiniCapture.dark6,
+                                                      dark: UIColor.GiniCapture.light1).uiColor(),
                                 shadowColor: .clear,
                                 cornerRadius: 16,
                                 borderWidth: 2,
@@ -326,6 +327,11 @@ import GiniBankAPILibrary
       * Set an adapter implementation to show a custom bottom navigation bar on the review screen.
      */
     public var reviewNavigationBarBottomAdapter: ReviewScreenBottomNavigationBarAdapter?
+
+    /**
+      * Set an adapter implementation to show a custom bottom navigation bar on the image picker screen.
+     */
+    public var imagePickerNavigationBarBottomAdapter: ImagePickerBottomNavigationBarAdapter?
     
     /**
       * Set an adapter implementation to show a custom bottom navigation bar on the onboarding screen.
