@@ -11,7 +11,7 @@ The Gini Capture SDK components can be customized either through the `GiniConfig
 - [Analysis screen](#analysis-screen)
 - [Help screens](#help-screens)
 - [No result screen](#no-result-screen)
-- [Error screens](#error-screens)
+- [Error screens](#error-screen)
 
 ## Colors
 
@@ -101,7 +101,9 @@ To allow users toggle the camera flash pass `true` to `GiniConfiguration.shared.
 - Turn off flash by default:
 Flash is on by default, and you can turn it off by passing `false` to `GiniConfiguration.shared.flashOnByDefault`.
 
-### Camera access TODO
+### Camera access
+
+<iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="600" height="450" src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Ffile%2F1985HMF83siAXmysSn3dC6%2FiOS-Gini-Capture-SDK-3.0.0-UI-Customisation%3Fnode-id%3D0%253A1%26t%3DtmWKIcsvPJbmqnrS-1" allowfullscreen></iframe>
 
 ### QR Code Scanning
 
@@ -129,7 +131,9 @@ This feature enables the Gini Capture SDK to import documents from the camera sc
 
 Please find more information in the [Import PDFs and images guide](https://developer.gini.net/gini-mobile-ios/GiniCaptureSDK/import-pdfs-and-images-guide.html).
 
-### Camera import error handling TODO
+### Camera import error handling
+
+<iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="600" height="450" src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Ffile%2F1985HMF83siAXmysSn3dC6%2FiOS-Gini-Capture-SDK-3.0.0-UI-Customisation%3Fnode-id%3D0%253A1%26t%3DtmWKIcsvPJbmqnrS-1" allowfullscreen></iframe>
 
 ## Review screen
 
@@ -138,7 +142,7 @@ Please find more information in the [Import PDFs and images guide](https://devel
 You can show a custom loading indicator with custom animation support on the process button.
 Your custom loading indicator should implement `OnButtonLoadingIndicatorAdapter` interface and be passed  to `GiniConfiguration.shared.onButtonLoadingIndicator`.
 
-The example implementation is available [here](https://github.com/gini/gini-mobile-ios/blob/GiniCaptureSDK%3B3.0.0-beta03/BankSDK/GiniBankSDKExample/GiniBankSDKExample/CustomLoadingIndicator.swift#L36).
+The example implementation is available [here](https://github.com/gini/gini-mobile-ios/blob/GiniCaptureSDK%3B3.0.0-beta04/BankSDK/GiniBankSDKExample/GiniBankSDKExample/CustomLoadingIndicator.swift#L36).
 
 ## Analysis screen
 
@@ -147,7 +151,7 @@ The example implementation is available [here](https://github.com/gini/gini-mobi
 You can show a custom loading indicator with custom animation support.
 Your custom loading indicator should implement `CustomLoadingIndicatorAdapter` interface and be passed  to `GiniConfiguration.shared.customLoadingIndicator`.
 
-The example implementation is available [here](https://github.com/gini/gini-mobile-ios/blob/GiniCaptureSDK%3B3.0.0-beta03/BankSDK/GiniBankSDKExample/GiniBankSDKExample/CustomLoadingIndicator.swift).
+The example implementation is available [here](https://github.com/gini/gini-mobile-ios/blob/GiniCaptureSDK%3B3.0.0-beta04/BankSDK/GiniBankSDKExample/GiniBankSDKExample/CustomLoadingIndicator.swift).
 
 ## Help screens
 
@@ -169,9 +173,9 @@ The example implementation is availible [here](https://github.com/gini/gini-mobi
 You can also disable the supported formats help screen by passing `false` to
 `GiniConfiguration.shared.shouldShowSupportedFormatsScreen`.
 
-## Gallery album screen TODO
+## Gallery album screen
 
-<iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="600" height="450" src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Ffile%2F1985HMF83siAXmysSn3dC6%2FiOS-Gini-Capture-SDK-3.0.0-UI-Customisation%3Fnode-id%3D279%253A7588%26t%3DcRAvcUKVlwGtGpuh-1" allowfullscreen></iframe>
+<iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="600" height="450" src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Ffile%2F1985HMF83siAXmysSn3dC6%2FiOS-Gini-Capture-SDK-3.0.0-UI-Customisation%3Fnode-id%3D279%253A7588%26t%3DtmWKIcsvPJbmqnrS-1" allowfullscreen></iframe>
 
 ## No result screen
 
@@ -183,10 +187,10 @@ For this you must to implement `GiniCaptureResultsDelegate.giniCaptureDidEnterMa
 You can show a bottom navigation bar by passing true to `GiniConfiguration.shared.bottomNavigationBarEnabled`. There is a default implementation, but you can also use
 your own by implementing the `NoResultBottomNavigationBarAdapter` interface and passing it to `GiniConfiguration.shared.noResultNavigationBarBottomAdapter`.
 
-You can find more details [here](https://developer.gini.net/gini-mobile-ios/GiniCaptureSDK/3.0.0-beta03/features.html#no-result-screen-customization).
+You can find more details [here](https://developer.gini.net/gini-mobile-ios/GiniCaptureSDK/3.0.0-beta04/features.html#no-result-screen-customization).
 
 ## Error screen
 
 <iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="600" height="450" src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Ffile%2F1985HMF83siAXmysSn3dC6%2FiOS-Gini-Capture-SDK-3.0.0-UI-Customisation%3Fnode-id%3D263%253A6858%26t%3DcRAvcUKVlwGtGpuh-1" allowfullscreen></iframe>
 
-You can find more details [here](https://developer.gini.net/gini-mobile-ios/GiniCaptureSDK/3.0.0-beta03/features.html#error-screen-customization).
+You can find more details [here](https://developer.gini.net/gini-mobile-ios/GiniCaptureSDK/3.0.0-beta04/features.html#error-screen-customization).

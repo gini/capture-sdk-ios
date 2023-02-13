@@ -25,11 +25,10 @@ import UIKit
 
     /**
      In case that the `GiniCaptureDocument` analysed is an image it will display a no results screen
-     with some capture suggestions. It won't show any screen if it is not an image, return `false` in that case.
-     
-     - returns: `true` if the screen was shown or `false` if it wasn't.
+     with some capture suggestions.
+
      */
-    func tryDisplayNoResultsScreen() -> Bool
+    func tryDisplayNoResultsScreen()
 }
 
 /**
@@ -234,7 +233,8 @@ import UIKit
         NSLayoutConstraint.activate([
             loadingIndicatorText.topAnchor.constraint(equalTo: loadingIndicator.bottomAnchor, constant: 16),
             loadingIndicatorText.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
-            loadingIndicatorText.centerXAnchor.constraint(equalTo: imageView.centerXAnchor)])
+            loadingIndicatorText.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
+            loadingIndicatorText.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)])
     }
 
     private func addLoadingView(intoContainer container: UIView? = nil) {
