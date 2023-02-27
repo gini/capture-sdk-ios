@@ -53,7 +53,7 @@ public protocol GiniCaptureError: Error {
     public var message: String {
         switch self {
         case .unknown:
-            return NSLocalizedStringPreferredFormat("ginicapture.review.unknownError", comment: "Unknown error")
+            return .localized(resource: ReviewStrings.unknownErrorMessage)
         }
     }
 }
@@ -135,50 +135,28 @@ public protocol GiniCaptureError: Error {
     /// PDF length exceeded
     case pdfPageLengthExceeded
     
-    // PDF password protected
-    case pdfPasswordProtected
-    
     /// QR Code formar not valid
     case qrCodeFormatNotValid
     
     public var message: String {
         switch self {
         case .exceededMaxFileSize:
-            return NSLocalizedStringPreferredFormat(
-                "ginicapture.camera.documentValidationError.excedeedFileSize",
-                comment: "Message text error shown in camera screen when a file size is higher than 10MB")
+            return .localized(resource: CameraStrings.exceededFileSizeErrorMessage)
         case .imageFormatNotValid:
-            return NSLocalizedStringPreferredFormat(
-                "ginicapture.camera.documentValidationError.wrongFormat",
-                comment: "Message text error shown in camera screen when a file " +
-                    "has a wrong format (neither PDF, JPEG, GIF, TIFF or PNG)")
+            return .localized(resource: CameraStrings.wrongFormatErrorMessage)
         case .fileFormatNotValid:
-            return NSLocalizedStringPreferredFormat(
-                "ginicapture.camera.documentValidationError.wrongFormat",
-                comment: "Message text error shown in camera screen when a file " +
-                "has a wrong format (neither PDF, JPEG, GIF, TIFF or PNG)")
+            return .localized(resource: CameraStrings.wrongFormatErrorMessage)
         case .pdfPageLengthExceeded:
-            return NSLocalizedStringPreferredFormat(
-                "ginicapture.camera.documentValidationError.tooManyPages",
-                comment: "Message text error shown in camera screen when a pdf length is higher than 10 pages")
-        case .pdfPasswordProtected:
-            return NSLocalizedStringPreferredFormat(
-                "ginicapture.camera.documentValidationError.pdfPasswordProtected",
-                comment: "Message text error shown when there pdf uplaoded is password protected")
+            return .localized(resource: CameraStrings.tooManyPagesErrorMessage)
         case .qrCodeFormatNotValid:
-            return NSLocalizedStringPreferredFormat(
-                "ginicapture.camera.documentValidationError.wrongFormat",
-                comment: "Message text error shown in camera screen when a file " +
-                "has a wrong format (neither PDF, JPEG, GIF, TIFF or PNG)")
+            return .localized(resource: CameraStrings.wrongFormatErrorMessage)
         case .unknown:
-            return NSLocalizedStringPreferredFormat(
-                "ginicapture.camera.documentValidationError.general",
-                comment: "Message text of a general document validation error shown in camera screen")
+            return .localized(resource: CameraStrings.documentValidationGeneralErrorMessage)
         }
     }
     
     public static func == (lhs: DocumentValidationError, rhs: DocumentValidationError) -> Bool {
-        return lhs.rawValue == rhs.rawValue
+        return lhs.message == rhs.message
     }
 }
 

@@ -11,7 +11,7 @@ final class AlbumsPickerTableViewCell: UITableViewCell {
     
     static let identifier = "AlbumsPickerTableViewCellIdentifier"
     static let height: CGFloat = 90.0
-    let padding = UIEdgeInsets(top: 10, left: 16, bottom: 10, right: 10)
+    let padding = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
     
     lazy var albumThumbnailView: UIImageView = {
         let imageView = UIImageView(frame: .zero)
@@ -23,7 +23,6 @@ final class AlbumsPickerTableViewCell: UITableViewCell {
         imageView.layer.shadowOpacity = 0.5
         imageView.layer.shadowOffset = CGSize(width: -2, height: 2)
         imageView.layer.shadowPath = UIBezierPath(rect: imageView.bounds).cgPath
-        imageView.layer.cornerRadius = 8
         
         return imageView
     }()
@@ -31,7 +30,7 @@ final class AlbumsPickerTableViewCell: UITableViewCell {
     lazy var albumTitleLabel: UILabel = {
         let albumTitle = UILabel(frame: .zero)
         albumTitle.translatesAutoresizingMaskIntoConstraints = false
-        albumTitle.textColor = GiniColor(light: .GiniCapture.dark1, dark: .GiniCapture.light1).uiColor()
+        
         return albumTitle
     }()
     
@@ -39,7 +38,11 @@ final class AlbumsPickerTableViewCell: UITableViewCell {
         let albumSubTitle = UILabel(frame: .zero)
         albumSubTitle.translatesAutoresizingMaskIntoConstraints = false
         
-        albumSubTitle.textColor = GiniColor(light: .GiniCapture.dark6, dark: .GiniCapture.light6).uiColor()
+        if #available(iOS 13.0, *) {
+            albumSubTitle.textColor = .secondaryLabel
+        } else {
+            albumSubTitle.textColor = .lightGray
+        }
         
         return albumSubTitle
     }()
@@ -50,8 +53,6 @@ final class AlbumsPickerTableViewCell: UITableViewCell {
         addSubview(albumThumbnailView)
         addSubview(albumTitleLabel)
         addSubview(albumSubTitleLabel)
-
-        backgroundColor = .clear
         addConstraints()
     }
     
@@ -90,8 +91,8 @@ final class AlbumsPickerTableViewCell: UITableViewCell {
     func setUp(with album: Album, giniConfiguration: GiniConfiguration, galleryManager: GalleryManagerProtocol) {
         albumTitleLabel.text = album.title
         albumSubTitleLabel.text = "\(album.count)"
-        albumTitleLabel.font = giniConfiguration.textStyleFonts[.headline]
-        albumSubTitleLabel.font = giniConfiguration.textStyleFonts[.subheadline]
+        albumTitleLabel.font = giniConfiguration.customFont.with(weight: .regular, size: 16, style: .headline)
+        albumSubTitleLabel.font = giniConfiguration.customFont.with(weight: .regular, size: 12, style: .subheadline)
         
         let asset = album.assets[album.assets.count - 1]
         galleryManager.fetchImage(from: asset,

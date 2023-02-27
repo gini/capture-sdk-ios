@@ -19,9 +19,9 @@ final class AlbumsHeaderView: UITableViewHeaderFooterView {
         let configuration = GiniConfiguration.shared
         let buttonTitle = NSLocalizedStringPreferredFormat("ginicapture.albums.selectMorePhotosButton",
                                                            comment: "Title for select more photos button")
-        selectPhotosButton.titleLabel?.font = configuration.textStyleFonts[.footnote]
+        selectPhotosButton.titleLabel?.font = configuration.customFont.with(weight: .regular, size: 16, style: .footnote)
         selectPhotosButton.setTitle(buttonTitle, for: .normal)
-        selectPhotosButton.setTitleColor(.GiniCapture.accent1, for: .normal)
+        selectPhotosButton.setTitleColor(UIColor.from(giniColor: configuration.albumsScreenSelectMorePhotosTextColor), for: .normal)
         selectPhotosButton.sizeToFit()
     }
 

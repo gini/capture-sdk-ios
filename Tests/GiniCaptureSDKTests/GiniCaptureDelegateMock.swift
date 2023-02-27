@@ -9,9 +9,6 @@
 import Foundation
 @testable import GiniCaptureSDK
 final class GiniCaptureDelegateMock: GiniCaptureDelegate {
-    func didPressEnterManually() {
-    }
-    
     func didCapture(document: GiniCaptureDocument, networkDelegate: GiniCaptureNetworkDelegate) {
         
     }

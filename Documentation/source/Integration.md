@@ -1,20 +1,16 @@
 Integration
 =============================
-## Request camera access
 
-**Note**: You need to specify the `NSCameraUsageDescription` key in your `Info.plist` file.
-This key is mandatory for all apps since iOS 10 when using the `Camera` framework.
+The Gini Capture SDK provides two integration options. A [Screen API](#screen-api) that is easy to implement and a more complex, but also more flexible [Component API](#component-api). Both APIs can access the complete functionality of the SDK.
 
-Also if you're using the [Gini Bank API Library](https://github.com/gini/bank-api-library-ios) you need to add support for "Keychain Sharing" in your entitlements by adding a `keychain-access-groups` value to your entitlements file. 
-For more information see the [Integration Guide](https://developer.gini.net/gini-mobile-ios/GiniBankAPILibrary/getting-started.html) of the Gini Bank API Library.
+**Note**: You need to specify the `NSCameraUsageDescription` key in your `Info.plist` file. This key is mandatory for all apps since iOS 10 when using the `Camera` framework. Also if you're using the [Gini Bank API Library](https://github.com/gini/bank-api-library-ios) you need to add support for "Keychain Sharing" in your entitlements by adding a `keychain-access-groups` value to your entitlements file. For more information see the [Integration Guide](https://developer.gini.net/gini-mobile-ios/GiniBankAPILibrary/getting-started.html) of the Gini Bank API Library.
 
-## Start SDK
+## Screen API
 
-The SDK provides a custom `UIViewController` object, which can be presented modally. It handles the complete process from showing the onboarding until providing a UI for the analysis.
-Gini Capture SDK offers two different ways of the networking implementation:
+The Screen API provides a custom `UIViewController` object, which can be presented modally. It handles the complete process from showing the onboarding until providing a UI for the analysis.
+The Screen API, in turn, offers two different ways of implementation:
 
-### Default Networking (Recommended)
-
+### UI with Default Networking (Recommended)
 Using this method you don't need to care about handling the analysis process with the [Gini Bank API Library](https://github.com/gini/bank-api-library-ios), you only need to provide your API credentials and a delegate to get the analysis results.
 
 ```swift
@@ -34,7 +30,7 @@ import TrustKit
 
 let yourPublicPinningConfig = [
     kTSKPinnedDomains: [
-    "pay-api.gini.net": [
+    "api.gini.net": [
         kTSKPublicKeyHashes: [
         // old *.gini.net public key
         "cNzbGowA+LNeQ681yMm8ulHxXiGojHE8qAjI+M7bIxU=",
@@ -67,14 +63,14 @@ present(viewController, animated: true, completion:nil)
 
 #### Retrieve the Analyzed Document
 
-The `AnalysisResult` returned in `GiniCaptureResultsDelegate.giniCaptureAnalysisDidFinishWith(result:)` 
+The `AnalysisResult` returned in `GiniCaptureResultsDelegate.giniCaptureAnalysisDidFinishWith(result:, sendFeedbackBlock:)` 
 will return the analyzed Gini Bank API document in its `document` property.
 
-When extractions were retrieved without using the Gini Bank API, then the `AnalysisResult.document` will be `nil`. For example when the extractions came from an EPS QR Code.
+When extractions were retrieved without using the Gini Bank API, then the `AnalysisResult.document` will be `nil`. For example when the
+extractions came from an EPS QR Code.
 
-### Custom Networking
-
-You can also provide your own networking by implementing the `GiniCaptureNetworkService` and `GiniCaptureResultsDelegate` protocols. Pass your instances to the `UIViewController` initialiser of `GiniCapture` as shown below.
+### UI with Custom Networking
+You can also provide your own networking by implementing the `GiniCaptureNetworkService` and `GiniCaptureResultsDelegate` protocols. Pass your instances to the UIViewController initialiser of GiniCapture as shown below.
 
 ```swift
 let viewController = GiniCapture.viewController(importedDocuments: visionDocuments,
@@ -87,10 +83,30 @@ let viewController = GiniCapture.viewController(importedDocuments: visionDocumen
 
 present(viewController, animated: true, completion: nil)
 ```
-
 You may also use the [Gini Bank API Library](https://github.com/gini/bank-api-library-ios) or implement communication with the Gini Bank API yourself.
+## Component API
 
-## Sending Feedback - TODO
+The Component API provides a custom `UIViewController` for each screen. This allows a maximum of flexibility, as the screens can be presented modally, used in a container view or pushed to a navigation view controller. Make sure to add your own navigational elements around the provided views.
+
+To also use the `GiniConfiguration` with the Component API just use the `GiniCapture.setConfiguration(_:)` as follows:
+
+```swift
+let giniConfiguration = GiniConfiguration()
+.
+.
+.
+GiniCapture.setConfiguration(giniConfiguration)
+```
+
+The components that can be found in the SDK are:
+* **Camera**: The actual camera screen to capture the image of the document, to import a PDF or an image or to scan a QR Code (`CameraViewController`).
+* **Review**: Offers the opportunity to the user to check the sharpness of the image and eventually to rotate it into reading direction (`ReviewViewController`).
+* **Multipage Review**: Allows to check the quality of one or several images and the possibility to rotate and reorder them (`MultipageReviewViewController`).
+* **Analysis**: Provides a UI for the analysis process of the document by showing the user capture tips when an image is analyzed or the document information when it is a PDF. In both cases an image preview of the document analyzed will be shown (`AnalysisViewController`).
+* **Help**: Helpful tutorials indicating how to use the open with feature, which are the supported file types and how to capture better photos for a good analysis (`HelpMenuViewController`).
+* **No results**: Shows some suggestions to capture better photos when there are no results after an analysis (`ImageAnalysisNoResultsViewController`).
+
+## Sending Feedback
 
 Your app should send feedback for the extractions the Gini Bank API delivered. Feedback should be sent only for the extractions the user has seen and accepted (or corrected).
 
@@ -101,7 +117,7 @@ The sample test case is based on the Bank API documentation's [recommended steps
 
 For additional information about feedback see the [Gini Bank API documentation](https://pay-api.gini.net/documentation/#send-feedback-and-get-even-better-extractions-next-time).
 
-### Default networking implementation - TODO
+### Default networking implementation
 
 The example below shows how to correct extractions and send feedback using the default networking implementation:
 
@@ -127,47 +143,8 @@ updatedExtractions.map{$0.value}.first(where: {$0.name == "amountToPay"})?.value
 sendFeedbackBlock(updatedExtractions)
 
 ```
-### Custom networking implementation - TODO
+### Custom networking implementation
 
 If you use your own networking implementation and directly communicate with the Gini Bank API then see [this section](https://pay-api.gini.net/documentation/#submitting-feedback-on-extractions) in its documentation on how to send feedback.
 
 In case you use the [Gini Bank API Library](https://developer.gini.net/gini-mobile-ios/GiniBankAPILibrary/) then see [this section](https://developer.gini.net/gini-mobile-ios/GiniBankAPILibrary/getting-started.html) in its documentation for details.
-
-## Capturing documents
-
-To launch the Gini Capture SDK you only need to:
-
-1.  Request camera access via configuring `Info.plist` in your project.
-
-2.  Configure `GiniConfiguration.shared`. The implementation example can be found [here](https://github.com/gini/gini-mobile-ios/blob/new-ui/CaptureSDK/GiniCaptureSDKExample/Example%20Swift/AppCoordinator.swift#L32)
-
-3.  Present the `UIViewController`.
-
-You can find the example [here](https://github.com/gini/gini-mobile-ios/blob/new-ui/CaptureSDK/GiniCaptureSDKExample/Example%20Swift/ScreenAPICoordinator.swift#L44)
-
-4.  Handle the extraction results
-
-For handling the extraction results you need to implement `GiniCaptureResultsDelegate `.
-[Here](https://github.com/gini/gini-mobile-ios/blob/new-ui/CaptureSDK/GiniCaptureSDKExample/Example%20Swift/ScreenAPICoordinator.swift#L128) you can find the implementation example.
-
-5.  Cleanup configuration and resources.
-
-The cleanup step includes the previously called `feedback sending` method. You don't need to implement any extra steps, just follow the recommendations below:
-
- - Please do cleanup always for all necessary fields, including those that were not extracted.
-
- - Please do cleanup with final data approved by the user (and not initially extracted only).
-
- - Please do cleanup after TAN verification.
-
-```swift
-GiniConfiguration.shared.cleanup(paymentRecipient: "Payment Recipient",
-                                        paymentReference: "Payment Reference",
-                                        paymentPurpose: "Payment Purpose",
-                                        iban: "IBAN",
-                                        bic: "BIC",
-                                        amountToPay: ExtractionAmount(value: 10.242, currency: .EUR))
-```
-
-Check out the [example app](https://github.com/gini/gini-mobile-ios/tree/new-ui/CaptureSDK/GiniCaptureSDKExample/Example%20Swift) to see how an integration could look like.
-The following example shows how to launch the Gini Capture SDK and how to handle the extraction results.

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import CoreGraphics
 
 public final class GiniCaptureDocumentValidator {
     
@@ -62,11 +61,6 @@ fileprivate extension GiniCaptureDocumentValidator {
             try validate(qrCode: document)
         case let pdfDocument as GiniPDFDocument:
             if pdfDocument.data.isPDF {
-                if let dataProvider = CGDataProvider(data: pdfDocument.data as CFData), let pdfDocument = CGPDFDocument(dataProvider) {
-                    if !pdfDocument.isUnlocked {
-                        throw DocumentValidationError.pdfPasswordProtected
-                    }
-                }
                 if case 1...maxPagesCount = pdfDocument.numberPages {
                     return
                 } else {
