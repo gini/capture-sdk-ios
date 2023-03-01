@@ -46,7 +46,9 @@ final class GalleryCoordinator: NSObject, Coordinator {
     
     lazy fileprivate(set) var galleryNavigator: UINavigationController = {
         let navController = UINavigationController(rootViewController: self.albumsController)
-        navController.applyStyle(withConfiguration: self.giniConfiguration)
+        if giniConfiguration.customNavigationController == nil {
+            navController.applyStyle(withConfiguration: self.giniConfiguration)
+        }
         navController.delegate = self
         return navController
     }()
@@ -54,7 +56,11 @@ final class GalleryCoordinator: NSObject, Coordinator {
     lazy fileprivate(set) var albumsController: AlbumsPickerViewController = {
         let albumsPickerVC = AlbumsPickerViewController(galleryManager: self.galleryManager)
         albumsPickerVC.delegate = self
-        albumsPickerVC.navigationItem.rightBarButtonItem = self.cancelButton
+        if giniConfiguration.bottomNavigationBarEnabled {
+            albumsPickerVC.navigationItem.rightBarButtonItem = self.cancelButton
+        } else {
+            albumsPickerVC.navigationItem.leftBarButtonItem = self.cancelButton
+        }
         return albumsPickerVC
     }()
     
@@ -70,17 +76,15 @@ final class GalleryCoordinator: NSObject, Coordinator {
         let button = UIButton(type: UIButton.ButtonType.custom)
         button.addTarget(self, action: #selector(openImages), for: .touchUpInside)
         button.frame.size = CGSize(width: 50, height: 20)
-        button.titleLabel?.textColor = giniConfiguration.navigationBarItemTintColor
-        
-        let currentFont = button.titleLabel?.font
-        let fontSize = currentFont?.pointSize ?? 18
-        let attributes = [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: fontSize)]
-        let openLocalizedString: String = .localized(resource: GalleryStrings.imagePickerOpenButton)
+        button.titleLabel?.textColor = UIColor.GiniCapture.accent1
+
+        let attributes = [NSAttributedString.Key.font: giniConfiguration.textStyleFonts[.bodyBold] as Any]
+        let openLocalizedString: String = NSLocalizedStringPreferredFormat("ginicapture.imagepicker.openbutton",
+                                                                           comment: "Open")
         let attributedString = NSMutableAttributedString(string: openLocalizedString,
                                                          attributes: attributes)
         button.setAttributedTitle(attributedString, for: .normal)
         button.titleLabel?.adjustsFontSizeToFitWidth = true
-        button.titleLabel?.minimumScaleFactor = 14/fontSize
         
         return UIBarButtonItem(customView: button)
     }()
@@ -146,6 +150,9 @@ final class GalleryCoordinator: NSObject, Coordinator {
                                                                   giniConfiguration: giniConfiguration)
         imagePickerViewController.delegate = self
         imagePickerViewController.navigationItem.rightBarButtonItem = cancelButton
+        if giniConfiguration.bottomNavigationBarEnabled {
+            imagePickerViewController.navigationItem.setHidesBackButton(true, animated: false)
+        }
         return imagePickerViewController
     }
     
@@ -225,8 +232,8 @@ extension GalleryCoordinator: UINavigationControllerDelegate {
                               to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         if let imagePicker = fromVC as? ImagePickerViewController {
             galleryManager.stopCachingImages(for: imagePicker.currentAlbum)
-            selectedImageDocuments.removeAll()
             currentImagePickerViewController = nil
+            selectedImageDocuments.removeAll()
         }
         return nil
     }
