@@ -134,13 +134,9 @@ public final class Camera2ViewController: UIViewController, CameraScreen {
         navigationItem.leftBarButtonItem = nil
         navigationItem.hidesBackButton = true
         if !containsImage {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(
-                title: NSLocalizedStringPreferredFormat(
-                    "ginicapture.camera.popupCancel",
-                    comment: "Cancel button"),
-                style: .plain,
-                target: cameraButtonsViewModel,
-                action: #selector(cameraButtonsViewModel.cancelPressed))
+            let cancelBarButton = GiniBarButton(ofType: .cancel)
+            cancelBarButton.addAction(cameraButtonsViewModel, #selector(cameraButtonsViewModel.cancelPressed))
+            navigationItem.rightBarButtonItem = cancelBarButton.barButton
         } else {
             navigationItem.rightBarButtonItem = nil
         }
@@ -409,6 +405,10 @@ public final class Camera2ViewController: UIViewController, CameraScreen {
     }
 
     private func showValidQRCodeFeedback() {
+        // Haptic feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+
         validQRCodeProcessing = true
         cameraPane.isUserInteractionEnabled = false
         UIView.animate(withDuration: 0.3) {
@@ -420,6 +420,10 @@ public final class Camera2ViewController: UIViewController, CameraScreen {
     }
 
     private func showInvalidQRCodeFeedback() {
+        // Haptic feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.warning)
+
         qrCodeOverLay.isUserInteractionEnabled = false
         UIView.animate(withDuration: 0.3) {
             self.qrCodeOverLay.isHidden = false
