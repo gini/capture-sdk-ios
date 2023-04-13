@@ -7,40 +7,22 @@
 //
 
 import UIKit
-import GiniBankAPILibrary
 /**
  The `GiniColor` class allows to customize color for the light and the dark modes.
  */
 @objc public class GiniColor : NSObject {
-    var light: UIColor
-    var dark: UIColor
+    var lightModeColor: UIColor
+    var darkModeColor: UIColor
     
     /**
      Creates a GiniColor with the colors for the light and dark modes.
      
-     - parameter light: color for the light mode
-     - parameter dark: color for the dark mode
+     - parameter lightModeColor: color for the light mode
+     - parameter darkModeColor: color for the dark mode
      */
-    public init(light: UIColor, dark: UIColor) {
-        self.light = light
-        self.dark = dark
-    }
-
-    public func uiColor() -> UIColor {
-        if #available(iOS 13, *) {
-            return UIColor { (UITraitCollection: UITraitCollection) -> UIColor in
-                if UITraitCollection.userInterfaceStyle == .dark {
-                    /// Return the color for Dark Mode
-                    return self.dark
-                } else {
-                    /// Return the color for Light Mode
-                    return self.light
-                }
-            }
-        } else {
-            /// Return a fallback color for iOS 12 and lower.
-            return self.light
-        }
+    public init(lightModeColor: UIColor, darkModeColor: UIColor) {
+        self.lightModeColor = lightModeColor
+        self.darkModeColor = darkModeColor
     }
 }
 
@@ -63,7 +45,7 @@ import GiniBankAPILibrary
     /**
      Singleton to make configuration internally accessible in all classes of the Gini Capture SDK.
      */
-    public static var shared = GiniConfiguration()
+    static var shared = GiniConfiguration()
     
     /**
      Supported document types by Gini Capture SDK.
@@ -80,9 +62,18 @@ import GiniBankAPILibrary
      
      - returns: Instance of `GiniConfiguration`.
      */
-    override init() {}
+    public override init() {}
     
     // MARK: General options
+    
+    /**
+     Sets the background color in all screens of the Gini Capture SDK to the specified color.
+     
+     - note: Screen API only.
+     */
+    @available(*, unavailable,
+    message: "Use the screen specific background color instead e.g. onboardingScreenBackgroundColor")
+    @objc public var backgroundColor: UIColor = UIColor.black
     
     /**
      Sets custom validations that can be done apart from the default ones (file size, file type...).
@@ -91,62 +82,7 @@ import GiniBankAPILibrary
     @objc public var customDocumentValidations: ((GiniCaptureDocument) -> CustomDocumentValidationResult) = { _ in
         return CustomDocumentValidationResult.success()
     }
-
-    // MARK: Button configuration options
-
-    public lazy var primaryButtonConfiguration: ButtonConfiguration =
-            ButtonConfiguration(backgroundColor: .GiniCapture.accent1,
-                                borderColor: .clear,
-                                titleColor: .GiniCapture.light1,
-                                shadowColor: .clear,
-                                cornerRadius: 16,
-                                borderWidth: 0,
-                                shadowRadius: 0,
-                                withBlurEffect: false)
-
-    public lazy var secondaryButtonConfiguration: ButtonConfiguration =
-            ButtonConfiguration(backgroundColor: .GiniCapture.dark4,
-                                borderColor: GiniColor(light: UIColor.GiniCapture.light6,
-                                                      dark: UIColor.clear).uiColor(),
-                                titleColor: GiniColor(light: UIColor.GiniCapture.dark6,
-                                                      dark: UIColor.GiniCapture.light1).uiColor(),
-                                shadowColor: .clear,
-                                cornerRadius: 16,
-                                borderWidth: 2,
-                                shadowRadius: 14,
-                                withBlurEffect: true)
-
-    public lazy var transparentButtonConfiguration: ButtonConfiguration =
-            ButtonConfiguration(backgroundColor: .clear,
-                                borderColor: .clear,
-                                titleColor: .GiniCapture.accent1,
-                                shadowColor: .clear,
-                                cornerRadius: 16,
-                                borderWidth: 0,
-                                shadowRadius: 0,
-                                withBlurEffect: false)
-
-    public lazy var cameraControlButtonConfiguration: ButtonConfiguration =
-            ButtonConfiguration(backgroundColor: .clear,
-                                borderColor: .clear,
-                                titleColor: .GiniCapture.light1,
-                                shadowColor: .clear,
-                                cornerRadius: 0,
-                                borderWidth: 0,
-                                shadowRadius: 0,
-                                withBlurEffect: false)
-
-    public lazy var addPageButtonConfiguration: ButtonConfiguration =
-            ButtonConfiguration(backgroundColor: .clear,
-                                borderColor: .clear,
-                                titleColor: GiniColor(light: .GiniCapture.dark2, dark: .GiniCapture.light2).uiColor(),
-                                shadowColor: .clear,
-                                cornerRadius: 0,
-                                borderWidth: 0,
-                                shadowRadius: 0,
-                                withBlurEffect: false)
     
-    // MARK: - TODO DELETE
     /**
      Sets the font used in the GiniCapture library by default.
      */
@@ -159,7 +95,7 @@ import GiniBankAPILibrary
                                                                       thin: UIFont.systemFont(ofSize: 14,
                                                                                               weight: .thin),
                                                                       isEnabled: false)
-
+    
     /**
      Can be turned on during development to unlock extra information and to save captured images to camera roll.
      
@@ -179,14 +115,56 @@ import GiniBankAPILibrary
     @objc public var multipageEnabled = false
     
     /**
-     Sets the custom navigation view controller as a root view controller for Gini Capture SDK screens.
-    */
-    @objc public var customNavigationController : UINavigationController? = nil
+     Sets the tint color of the navigation bar in all screens of the Gini Capture SDK to
+     the globally specified color or to a default color.
+     
+     - note: Screen API only.
+     */
+    @objc public var navigationBarTintColor = UINavigationBar.appearance().barTintColor ?? Colors.Gini.blue
+    
+    /**
+     Sets the tint color of all navigation items in all screens of the Gini Capture SDK to
+     the globally specified color.
+     
+     - note: Screen API only.
+     */
+    @objc public var navigationBarItemTintColor = UINavigationBar.appearance().tintColor
+    
+    /**
+     Sets the font of all navigation items in all screens of the Gini Capture SDK to
+     the globally specified font or a default font.
+     
+     - note: Screen API only.
+     */
+    @objc public var navigationBarItemFont = UIBarButtonItem.appearance()
+        .titleTextAttributes(for: .normal).dictionary?[NSAttributedString.Key.font.rawValue] as? UIFont ??
+        UIFont.systemFont(ofSize: 16, weight: .bold)
+    
+    /**
+     Sets the title color in the navigation bar in all screens of the Gini Capture SDK to
+     the globally specified color or to a default color.
+     
+     - note: Screen API only.
+     */
+    @objc public var navigationBarTitleColor = UINavigationBar
+        .appearance()
+        .titleTextAttributes?[NSAttributedString.Key.foregroundColor] as? UIColor ?? .white
+    
+    /**
+     Sets the title font in the navigation bar in all screens of the Gini Capture SDK to
+     the globally specified font or to a default font.
+
+     - note: Screen API only.
+     */
+    @objc public var navigationBarTitleFont = UINavigationBar
+        .appearance()
+        .titleTextAttributes?[NSAttributedString.Key.font] as? UIFont ?? UIFont.systemFont(ofSize: 16, weight: .regular)
     
     /**
      Sets the tint color of the UIDocumentPickerViewController navigation bar.
      
      - note: Use only if you have a custom `UIAppearance` for your UINavigationBar
+     - note: Only iOS >= 11.0
      */
     @objc public var documentPickerNavigationBarTintColor: UIColor?
     
@@ -224,11 +202,6 @@ import GiniBankAPILibrary
      Indicates whether the QR Code scanning feature is enabled or not.
      */
     @objc public var qrCodeScanningEnabled = false
-
-    /**
-     Indicates whether only the QR Code scanning feature is enabled or not.
-     */
-    @objc public var onlyQRCodeScanningEnabled = false
     
     /**
      Indicates the status bar style in the Gini Capture SDK.
@@ -240,16 +213,97 @@ import GiniBankAPILibrary
     @objc public var statusBarStyle = UIStatusBarStyle.lightContent
     
     // MARK: Camera options
-
+    
+    /**
+     Sets the text color of the descriptional text when camera access was denied.
+     */
+    @objc public var cameraNotAuthorizedTextColor = UIColor.white
+    
+    /**
+     Sets the text color of the button title when camera access was denied.
+     */
+    @objc public var cameraNotAuthorizedButtonTitleColor = UIColor.white
+    
     /**
      Sets the color of the loading indicator on the camera screen to the specified color.
      */
     @objc public var cameraSetupLoadingIndicatorColor = UIColor.white
     
     /**
+     Sets the color of camera preview corner guides.
+     */
+    @objc public var cameraPreviewCornerGuidesColor = UIColor.white
+    
+    /**
+     Sets the background color of camera container view.
+     */
+    @objc public var cameraContainerViewBackgroundColor = GiniColor(lightModeColor: .black, darkModeColor: .black)
+    
+    /**
+     Sets the color of camera preview frame.
+     */
+    @objc public var cameraPreviewFrameColor = GiniColor(lightModeColor: UIColor(white: 0.0, alpha: 0.7), darkModeColor: UIColor(white: 0.0, alpha: 0.7))
+    
+    /**
+     Sets the background color of camera buttons view.
+     */
+    @objc public var cameraButtonsViewBackgroundColor = GiniColor(lightModeColor: .black, darkModeColor: .black)
+    
+    /**
      Set the types supported by the file import feature. `GiniCaptureImportFileTypes.none` by default.
      */
     @objc public var fileImportSupportedTypes: GiniCaptureImportFileTypes = .none
+    
+    /**
+     Sets the background color of the new file import button hint.
+     */
+    @objc public var fileImportToolTipBackgroundColor = UIColor.white
+    
+    /**
+     Sets the text color of the new file import button hint.
+     */
+    @objc public var fileImportToolTipTextColor = UIColor.black
+    
+    /**
+     Sets the color of the close button for the file import button hint.
+     */
+    @objc public var fileImportToolTipCloseButtonColor = Colors.Gini.grey
+    
+    /**
+     Sets the background style when the tooltip is shown.
+     */
+    public var toolTipOpaqueBackgroundStyle: OpaqueViewStyle {
+        
+        set {
+            _toolTipOpaqueBackgroundStyle = newValue
+        }
+        
+        get {
+            
+            if let setValue = _toolTipOpaqueBackgroundStyle {
+                return setValue
+            } else {
+                
+                if #available(iOS 13.0, *) {
+                    return .blurred(style: .regular)
+                } else {
+                    return .blurred(style: .dark)
+                }
+            }
+        }
+    }
+    
+    private var _toolTipOpaqueBackgroundStyle: OpaqueViewStyle?
+    
+    /**
+     Sets the text color of the item selected background check.
+     */
+    @objc public var galleryPickerItemSelectedBackgroundCheckColor = Colors.Gini.blue
+    
+    /**
+     Sets the background color for gallery screen.
+     */
+    @objc public var galleryScreenBackgroundColor = GiniColor(lightModeColor: .black, darkModeColor: .black)
     
     /**
      Indicates whether the flash toggle should be shown in the camera screen.
@@ -262,25 +316,82 @@ import GiniBankAPILibrary
     @objc public var flashOnByDefault = true
     
     /**
+     Sets the color of the captured images stack indicator label.
+     */
+    @objc public var imagesStackIndicatorLabelTextcolor: UIColor = Colors.Gini.blue
+    
+    /**
      Sets the close button text in the navigation bar on the camera screen.
-          */
+     
+     - note: Screen API only.
+     */
     @objc public var navigationBarCameraTitleCloseButton = ""
     
     /**
      Sets the help button text in the navigation bar on the camera screen.
+     
+     - note: Screen API only.
      */
     @objc public var navigationBarCameraTitleHelpButton = ""
     
+    /**
+     Sets the text color of the QR Code popup button.
+     */
+    @objc public var qrCodePopupButtonColor = Colors.Gini.blue
+    
+    /**
+     Sets the text color of the QR Code popup label.
+     */
+    @objc public var qrCodePopupTextColor = GiniColor(lightModeColor: .black, darkModeColor: .white)
+    
+    /**
+     Sets the text color of the QR Code popup background.
+     */
+    @objc public var qrCodePopupBackgroundColor = GiniColor(lightModeColor: .white, darkModeColor: UIColor.from(hex: 0x1c1c1e))
+    
+    /**
+     Sets the button color of the unsupported QR Code popup.
+     */
+    @objc public var unsupportedQrCodePopupButtonColor : UIColor = .red
+    
+    /**
+     Sets the text color of the unsupported QR Code popup.
+     */
+    @objc public var unsupportedQrCodePopupTextColor = GiniColor(lightModeColor: .red, darkModeColor: .red)
+    
+    /**
+     Sets the  background color of the unsupported QR Code popup.
+     */
+    @objc public var unsupportedQrCodePopupBackgroundColor = GiniColor(lightModeColor: .white, darkModeColor: UIColor.from(hex: 0x1c1c1e))
     
     // MARK: Onboarding screens
 
     /**
-      * Sets the continue button text in the navigation bar on the onboarding screen.
+     Sets the continue button text in the navigation bar on the onboarding screen.
+     
+     - note: Screen API only.
      */
     @objc public var navigationBarOnboardingTitleContinueButton = ""
     
     /**
-      * Indicates whether the onboarding screen should be presented at each start of the Gini Capture SDK.
+     Sets the color of the page controller's page indicator items.
+     */
+    @objc public var onboardingPageIndicatorColor = GiniColor(lightModeColor: .white, darkModeColor: .white)
+    
+    /**
+     Sets the color of the page controller's current page indicator item.
+     */
+    @objc public var onboardingCurrentPageIndicatorColor = GiniColor(lightModeColor: .white, darkModeColor: .white)
+    
+    /**
+     Sets alpha to the color of the page controller's current page indicator item.
+     */
+    @objc public var onboardingCurrentPageIndicatorAlpha: CGFloat = 0.2
+    
+    /**
+     Indicates whether the onboarding screen should be presented at each start of the Gini Capture SDK.
+     
+     - note: Screen API only.
      */
     @objc public var onboardingShowAtLaunch = false
     
@@ -289,107 +400,200 @@ import GiniBankAPILibrary
      start of the Gini Capture SDK. It is advised to do so.
      
      - note: Overwrites `onboardingShowAtLaunch` for the first launch.
+     - note: Screen API only.
      */
     @objc public var onboardingShowAtFirstLaunch = true
-        
-    /**
-     Set custom onboarding pages
-     - note: For your convenience we provide the `OnboardingPage` struct.
-     */
-    public var customOnboardingPages: [OnboardingPage]?
-        
-    /**
-      * Enable/disable the bottom navigation bar.
-     */
-    public var bottomNavigationBarEnabled: Bool = false
     
     /**
-      * Set an adapter implementation to show a custom bottom navigation bar on the help screens.
+     Sets the color ot the text for all onboarding pages.
      */
-    public var helpNavigationBarBottomAdapter: HelpBottomNavigationBarAdapter?
+    @objc public var onboardingTextColor = GiniColor(lightModeColor: .white, darkModeColor: .white)
     
     /**
-      * Set an adapter implementation to show a custom bottom navigation bar on the camera screen.
+     Sets the background color for all onboarding pages.
      */
-    public var cameraNavigationBarBottomAdapter: CameraBottomNavigationBarAdapter?
-
-    /**
-      * Set an adapter implementation to show a custom bottom navigation bar on the review screen.
-     */
-    public var reviewNavigationBarBottomAdapter: ReviewScreenBottomNavigationBarAdapter?
-
-    /**
-      * Set an adapter implementation to show a custom bottom navigation bar on the image picker screen.
-     */
-    public var imagePickerNavigationBarBottomAdapter: ImagePickerBottomNavigationBarAdapter?
+    @objc public var onboardingScreenBackgroundColor = GiniColor(lightModeColor: .black, darkModeColor: .black)
     
     /**
-      * Set an adapter implementation to show a custom bottom navigation bar on the onboarding screen.
+     All onboarding pages which will be presented in a horizontal scroll view to the user.
+     By default the Gini Capture SDK comes with three pages advising the user to keep the
+     document flat, hold the device parallel and capture the whole document.
+     
+     - note: Any array of views can be passed, but for your convenience we provide the `GINIOnboardingPage` class.
      */
-    public var onboardingNavigationBarBottomAdapter: OnboardingNavigationBarBottomAdapter?
-    
-    /**
-      * Set an adapter implementation to show a custom illustration on the "align corners" onboarding page.
-     */
-    public var onboardingAlignCornersIllustrationAdapter: OnboardingIllustrationAdapter?
-
-     /**
-       * Set an adapter implementation to show a custom illustration on the "lighting" onboarding page.
-      */
-    public var onboardingLightingIllustrationAdapter: OnboardingIllustrationAdapter?
-
-     /**
-      * Set an adapter implementation to show a custom illustration on the "multi-page" onboarding page.
-      */
-    public var onboardingMultiPageIllustrationAdapter: OnboardingIllustrationAdapter?
-
-     /**
-      * Set an adapter implementation to show a custom illustration on the "QR code" onboarding page.
-      */
-    public var onboardingQRCodeIllustrationAdapter: OnboardingIllustrationAdapter?
-
-    /**
-     * Set an adapter implementation to show a custom loading indicator on the document analysis screen.
-     */
-    public var customLoadingIndicator: CustomLoadingIndicatorAdapter?
-
-    /**
-     * Set an adapter implementation to show a custom loading indicator on the buttons which support loading.
-     */
-    public var onButtonLoadingIndicator: OnButtonLoadingIndicatorAdapter?
+    @objc public var onboardingPages: [UIView] {
+        get {
+            if let pages = onboardingCustomPages {
+                return pages
+            }
+            guard let page1 = OnboardingPage(imageNamed: "onboardingPage1",
+                                             text: .localized(resource: OnboardingStrings.onboardingFirstPageText),
+                                             rotateImageInLandscape: true),
+                let page2 = OnboardingPage(imageNamed: "onboardingPage2",
+                                           text: .localized(resource: OnboardingStrings.onboardingSecondPageText)),
+                let page3 = OnboardingPage(imageNamed: "onboardingPage3",
+                                           text: .localized(resource: OnboardingStrings.onboardingThirdPageText)),
+                let page4 = OnboardingPage(imageNamed: "onboardingPage5",
+                                           text: .localized(resource: OnboardingStrings.onboardingFifthPageText)) else {
+                    return [UIView]()
+            }
+            
+            onboardingCustomPages = [page1, page2, page3, page4]
+            if let ipadTipPage = OnboardingPage(imageNamed: "onboardingPage4",
+                                                text: .localized(resource: OnboardingStrings.onboardingFourthPageText)),
+                UIDevice.current.isIpad {
+                onboardingCustomPages?.insert(ipadTipPage, at: 0)
+            }
+            return onboardingCustomPages!
+        }
+        set {
+            self.onboardingCustomPages = newValue
+        }
+    }
+    fileprivate var onboardingCustomPages: [UIView]?
     
     /**
      Sets the back button text in the navigation bar on the review screen. Use this if you only want to show the title.
+     
+     - note: Screen API only.
      */
     @objc public var navigationBarReviewTitleBackButton = ""
     
     /**
      Sets the close button text in the navigation bar on the review screen. Use this if you only want to show the title.
+     
+     - note: Screen API only.
      */
     @objc public var navigationBarReviewTitleCloseButton = ""
     
     /**
-     * Sets the continue button text in the navigation bar on the review screen.
+     Sets the continue button text in the navigation bar on the review screen.
+     
+     - note: Screen API only.
      */
     @objc public var navigationBarReviewTitleContinueButton = ""
+    
+    /**
+     Sets the background color of the bottom section on the review screen containing the rotation button.
+     
+     - note: Background will have a 20% transparency, to have enough space for the document image on smaller devices.
+     */
+    @objc public var reviewBottomViewBackgroundColor = UIColor.black
+    
+    /**
+     Sets the font of the text appearing at the bottom of the review screen.
+     */
+    @objc public var reviewTextBottomFont = UIFont.systemFont(ofSize: 12, weight: .thin)
+    
+    /**
+     Sets the color of the text appearing at the bottom of the review screen.
+     */
+    @objc public var reviewTextBottomColor = UIColor.white
+    
+    // MARK: Multipage options
+    
+    /**
+     Sets the color of the pages container and toolbar.
+     */
+    @objc public var multipagePagesContainerAndToolBarColor = GiniColor(lightModeColor: Colors.Gini.pearl, darkModeColor: UIColor.from(hex: 0x1c1c1c))
+    
+    @objc private var _multipagePagesContainerAndToolBarColor: UIColor?
+    
+    /**
+     Sets the color of the circle indicator.
+     */
+    @objc public var indicatorCircleColor = GiniColor(lightModeColor: Colors.Gini.pearl, darkModeColor: .lightGray)
+    
+    /**
+     Sets the tint color of the toolbar items.
+     */
+    @objc public var multipageToolbarItemsColor = Colors.Gini.blue
+    
+    /**
+     Sets the tint color of the page indicator.
+     */
+    @objc public var multipagePageIndicatorColor = Colors.Gini.blue
+    
+    /**
+     Sets the background color of the page selected indicator.
+     */
+    @objc public var multipagePageSelectedIndicatorColor = Colors.Gini.blue
+    
+    /**
+     Sets the background color of the page background.
+     */
+    @objc public var multipagePageBackgroundColor = GiniColor(lightModeColor: .white, darkModeColor: UIColor.from(hex: 0x1c1c1e))
+    
+    @objc private var _multipagePageBackgroundColor: UIColor?
+    
+    /**
+     Sets the tint color of the draggable icon in the page collection cell.
+     */
+    @objc public var multipageDraggableIconColor = Colors.Gini.veryLightGray
+
+    /**
+     Sets the background style when the tooltip is shown in the multipage screen.
+     */
+    public var multipageToolTipOpaqueBackgroundStyle: OpaqueViewStyle = .blurred(style: .light)
+    
+    /**
+     Sets the background color for the successfull upload icon.
+     */
+    public var multipagePageSuccessfullUploadIconBackgroundColor = Colors.Gini.springGreen
+    
+    /**
+     Sets the background color for the failed upload icon.
+     */
+    public var multipagePageFailureUploadIconBackgroundColor = Colors.Gini.springGreen
     
     // MARK: Analysis options
     
     /**
-     * Sets the back button text in the navigation bar on the analysis screen. Use this if you only want to show the title.
+     Sets the color of the loading indicator on the analysis screen to the specified color.
+     */
+    @objc public var analysisLoadingIndicatorColor = Colors.Gini.blue
+    
+    /**
+     Sets the color of the PDF information view on the analysis screen to the specified color.
+     */
+    @objc public var analysisPDFInformationBackgroundColor = Colors.Gini.bluishGreen
+    
+    /**
+     Sets the color of the PDF information view on the analysis screen to the specified color.
+     */
+    @objc public var analysisPDFInformationTextColor = UIColor.white
+    
+    /**
+     Sets the back button text in the navigation bar on the analysis screen. Use this if you only want to show the title.
+     
+     - note: Screen API only.
      */
     @objc public var navigationBarAnalysisTitleBackButton = ""
     
     // MARK: Help screens
     
     /**
+     Sets the background color for all help screens.
+     */
+    @objc public var helpScreenBackgroundColor =  GiniColor(lightModeColor: Colors.Gini.pearl, darkModeColor: UIColor.from(hex: 0x1C1C1C))
+    
+    /**
+     Sets the background color for the cells on help screen.
+     */
+    @objc public var helpScreenCellsBackgroundColor =  GiniColor(lightModeColor: Colors.Gini.pearl, darkModeColor: UIColor.from(hex: 0x1C1C1C))
+    
+    /**
      Sets the back button text in the navigation bar on the help menu screen. Use this if you only want to show the title.
+     
+     - note: Screen API only.
      */
     @objc public var navigationBarHelpMenuTitleBackToCameraButton = ""
     
     /**
      Sets the back button text in the navigation bar on the help screen. Use this if you only want to show the title.
-    */
+     
+     - note: Screen API only.
+     */
     @objc public var navigationBarHelpScreenTitleBackToMenuButton = ""
     
     /**
@@ -418,14 +622,48 @@ import GiniBankAPILibrary
     @objc public var openWithAppNameForTexts = Bundle.main.appName
     
     /**
+     Sets the color of the step indicator for the Open with tutorial.
+     */
+    @objc public var stepIndicatorColor = Colors.Gini.blue
+    
+    // MARK: No results options
+    
+    /**
+     Sets the color of the bottom button to the specified color.
+     */
+    @objc public var noResultsBottomButtonColor = Colors.Gini.blue
+    
+    /**
+     Sets the text color of the bottom button to the specified color.
+     */
+    @objc public var noResultsBottomButtonTextColor = GiniColor.init(lightModeColor: .white, darkModeColor: .white)
+    
+    /**
+     Sets the corner radius of the bottom button.
+     */
+    @objc public var noResultsBottomButtonCornerRadius: CGFloat = 0.0
+    
+    /**
+     Sets the color of the warning container background to the specified color.
+     */
+    @objc public var noResultsWarningContainerIconColor = Colors.Gini.rose
+    
+    /**
      Sets if the Drag&Drop step should be shown in the "Open with" tutorial.
      */
     @objc public var shouldShowDragAndDropTutorial = true
     
+    // MARK: Albums screen
+    
+    /**
+     Sets the text color for the select more photos button on the albums screen.
+     */
+    @objc public var albumsScreenSelectMorePhotosTextColor =  GiniColor(lightModeColor: Colors.Gini.blue, darkModeColor: Colors.Gini.blue)
+    
     /**
      Set an array of additional custom help menu items . Those items will be presented as table view cells on the help menu screen. By selecting the cell the user will be redirected to the page, which represented by viewController provided by customer during the  `HelpMenuViewController.Item` initialization.
     */
-    public var customMenuItems: [HelpMenuItem] = []
+    public var customMenuItems: [HelpMenuViewController.Item] = []
     
     /**
      Sets the default error logger. It is only used when giniErrorLoggerIsOn is true.
@@ -479,96 +717,4 @@ import GiniBankAPILibrary
     @objc public var backToMenuButtonResource: PreferredButtonResource?
     @objc public var nextButtonResource: PreferredButtonResource?
     @objc public var cancelButtonResource: PreferredButtonResource?
-    
-    /**
-     Set dictionary of fonts for available text styles. Used internally.
-     */
-    var textStyleFonts: [UIFont.TextStyle: UIFont] = [
-    .largeTitle: UIFontMetrics(forTextStyle: .largeTitle).scaledFont(for: UIFont.systemFont(ofSize: 34)),
-    .title1: UIFontMetrics(forTextStyle: .title1).scaledFont(for: UIFont.systemFont(ofSize: 28)),
-    .title1Bold: UIFontMetrics(forTextStyle: .title1).scaledFont(for: UIFont.boldSystemFont(ofSize: 28)),
-    .title2: UIFontMetrics(forTextStyle: .title2).scaledFont(for: UIFont.systemFont(ofSize: 22)),
-    .title3: UIFontMetrics(forTextStyle: .title3).scaledFont(for: UIFont.systemFont(ofSize: 20)),
-    .caption1: UIFontMetrics(forTextStyle: .caption1).scaledFont(for: UIFont.systemFont(ofSize: 12)),
-    .caption2: UIFontMetrics(forTextStyle: .caption2).scaledFont(for: UIFont.systemFont(ofSize: 11)),
-    .headline: UIFontMetrics(forTextStyle: .headline).scaledFont(for: UIFont.systemFont(ofSize: 17)),
-    .subheadline: UIFontMetrics(forTextStyle: .subheadline).scaledFont(for: UIFont.systemFont(ofSize: 15)),
-    .body: UIFontMetrics(forTextStyle: .body).scaledFont(for: UIFont.systemFont(ofSize: 17)),
-    .bodyBold: UIFontMetrics(forTextStyle: .body).scaledFont(for: UIFont.boldSystemFont(ofSize: 17)),
-    .callout: UIFontMetrics(forTextStyle: .callout).scaledFont(for: UIFont.systemFont(ofSize: 16)),
-    .calloutBold: UIFontMetrics(forTextStyle: .callout).scaledFont(for: UIFont.boldSystemFont(ofSize: 16)),
-    .footnote: UIFontMetrics(forTextStyle: .footnote).scaledFont(for: UIFont.systemFont(ofSize: 13)),
-    .footnoteBold: UIFontMetrics(forTextStyle: .footnote).scaledFont(for: UIFont.boldSystemFont(ofSize: 13)),
-    ]
-
-    /**
-     Allows setting a custom font for specific text styles. The change will affect all screens where a specific text style was used.
-     
-     - parameter font: Font that is going to be assosiated with specific text style. You can use scaled font or scale your font with our util method `UIFont.scaledFont(_ font: UIFont, textStyle: UIFont.TextStyle)`
-     - parameter textStyle: Constants that describe the preferred styles for fonts. Please, find additional information [here](https://developer.apple.com/documentation/uikit/uifont/textstyle)
-    */
-    public func updateFont(_ font: UIFont, for textStyle: UIFont.TextStyle) {
-        textStyleFonts[textStyle] = font
-    }
-
-    var documentService: DocumentServiceProtocol?
-
-     /// Function for clean up
-     /// - Parameters:
-     ///   - paymentRecipient: paymentRecipient description
-     ///   - paymentReference: paymentReference description
-     ///   - iban: iban description
-     ///   - bic: bic description
-     ///   - amountToPay: amountToPay description
-    public func cleanup(paymentRecipient: String, paymentReference: String, paymentPurpose: String, iban: String, bic: String, amountToPay: ExtractionAmount) {
-         guard let documentService = documentService else { return }
-
-         // Convert amount object to string
-         // Cut off decimals after the first 2
-         let truncatedAmountValue = amountToPay.value.convertToDouble(withDecimalPoint: 2)
-         let amountToPayString = "\(truncatedAmountValue)" + ":" + amountToPay.currency.rawValue
-
-         let paymentRecipientExtraction = Extraction(box: nil,
-                                                     candidates: nil,
-                                                     entity: "companyname",
-                                                     value: paymentRecipient,
-                                                     name: "paymentRecipient")
-         let paymentReferenceExtraction = Extraction(box: nil,
-                                                     candidates: nil,
-                                                     entity: "reference",
-                                                     value: paymentRecipient,
-                                                     name: "paymentReference")
-         let paymentPurposeExtraction = Extraction(box: nil,
-                                                   candidates: nil,
-                                                   entity: "text",
-                                                   value: paymentPurpose,
-                                                   name: "paymentPurpose")
-         let ibanExtraction = Extraction(box: nil,
-                                         candidates: nil,
-                                         entity: "iban",
-                                         value: iban,
-                                         name: "iban")
-         let bicExtraction = Extraction(box: nil,
-                                        candidates: nil,
-                                        entity: "bic",
-                                        value: bic,
-                                        name: "bic")
-         let amountExtraction = Extraction(box: nil,
-                                           candidates: nil,
-                                           entity: "amount",
-                                           value: amountToPayString,
-                                           name: "amountToPay")
-
-         let updatedExtractions: [Extraction] = [paymentRecipientExtraction,
-                                                 paymentReferenceExtraction,
-                                                 paymentPurposeExtraction,
-                                                 ibanExtraction,
-                                                 bicExtraction,
-                                                 amountExtraction]
-
-        documentService.sendFeedback(with: updatedExtractions, updatedCompoundExtractions: nil)
-
-         documentService.resetToInitialState()
-         self.documentService = nil
-     }
 }

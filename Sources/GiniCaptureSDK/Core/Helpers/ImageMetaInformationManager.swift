@@ -130,8 +130,8 @@ final class ImageMetaInformationManager {
     }
     
     // Returns the current image but with all meta information added
-    func imageByAddingMetadata(to processedImageData: Data? = nil, withCompression compression: CGFloat = JPEGDefaultCompression) -> Data? {
-        guard let image = processedImageData ?? imageData,
+    func imageByAddingMetadata(withCompression compression: CGFloat = JPEGDefaultCompression) -> Data? {
+        guard let image = imageData,
             let information = metaInformation, (image.isJPEG || image.isTIFF) else { return nil }
         
         let targetData = NSMutableData()
