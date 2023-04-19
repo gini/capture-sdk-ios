@@ -27,25 +27,6 @@ public func UIImageNamedPreferred(named name: String) -> UIImage? {
 }
 
 /**
- Returns an optional `UIColor` instance with the given `name` preferably from the client's bundle.
- 
- - parameter name: The name of the UIColor from `GiniColors` asset catalog.
- 
- - returns: color if found with name.
- */
-public func UIColorPreferred(named name: String) -> UIColor {
-    if let clientColor = UIColor(named: name) {
-        return clientColor
-    }
-
-    if let color = UIColor(named: name, in: giniCaptureBundle(), compatibleWith: nil) {
-        return color
-    } else {
-        fatalError("The color named '\(name)' does not exist.")
-    }
-}
-
-/**
  Returns a localized string resource preferably from the client's bundle.
  
  - parameter key:     The key to search for in the strings file.
@@ -204,6 +185,16 @@ public struct Colors {
 }
 
 /**
+    Set the status bar style when ViewControllerBasedStatusBarAppearance is disabled.
+    If it is enabled it will not have effect.
+ */
+
+func setStatusBarStyle(to statusBarStyle: UIStatusBarStyle,
+                       application: UIApplication = UIApplication.shared) {
+    application.setStatusBarStyle(statusBarStyle, animated: true)
+}
+
+/**
     Measure the time spent executing a block
  */
 
@@ -244,8 +235,4 @@ extension Foundation.Bundle {
         }
         return Bundle(for: GiniCapture.self)
     }()
-}
-
-public struct RoundedCorners {
-    static let cornerRadius: CGFloat = 8
 }

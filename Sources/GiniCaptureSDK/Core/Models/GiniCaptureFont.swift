@@ -6,8 +6,6 @@
 //  Copyright © 2017 Gini GmbH. All rights reserved.
 //
 
-// MARK: - TODO DELETE
-
 import UIKit
 
 /**
@@ -38,7 +36,11 @@ public class GiniCaptureFont: NSObject {
     }
     
     public func with(weight: UIFont.Weight, size: CGFloat, style: UIFont.TextStyle) -> UIFont {
-        return UIFontMetrics(forTextStyle: style).scaledFont(for: font(for: weight).withSize(size))
+        if #available(iOS 11.0, *) {
+            return UIFontMetrics(forTextStyle: style).scaledFont(for: font(for: weight).withSize(size))
+        } else {
+            return font(for: weight).withSize(size)
+        }
     }
     
     private func font(for weight: UIFont.Weight) -> UIFont {

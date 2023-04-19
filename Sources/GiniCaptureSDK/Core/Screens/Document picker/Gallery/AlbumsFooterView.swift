@@ -13,17 +13,16 @@ final class AlbumsFooterView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
         let configuration = GiniConfiguration.shared
-        let titleString = NSLocalizedStringPreferredFormat("ginicapture.albums.footer",
-                                                           comment: "Albums footer message")
-
-        label.isAccessibilityElement = true
-        label.text = titleString
-        label.accessibilityValue = titleString
-        label.font = configuration.textStyleFonts[.footnote]
-        label.textColor = GiniColor(light: .GiniCapture.dark1, dark: .GiniCapture.light1).uiColor()
+        label.text = NSLocalizedStringPreferredFormat("ginicapture.albums.footer",
+                                                      comment: "Albums footer message")
+        label.font = configuration.customFont.with(weight: .regular, size: 14, style: .footnote)
+        if #available(iOS 13.0, *) {
+            label.textColor = .label
+        } else {
+            label.textColor = .black
+        }
         label.textAlignment = .center
         label.lineBreakMode = .byWordWrapping
-        label.adjustsFontForContentSizeCategory = true
         return label
     }()
 
@@ -38,8 +37,7 @@ final class AlbumsFooterView: UIView {
 
     fileprivate func setupConstraints() {
         // Hack to fix AutoLayout bug related to UIView-Encapsulated-Layout-Width
-        let leadingContraint = contentLabel.leadingAnchor.constraint(equalTo: leadingAnchor,
-                                                                     constant: Constants.padding)
+        let leadingContraint = contentLabel.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor)
         leadingContraint.priority = .defaultHigh
         
         // Hack to fix AutoLayout bug related to UIView-Encapsulated-Layout-Height
@@ -49,7 +47,7 @@ final class AlbumsFooterView: UIView {
         NSLayoutConstraint.activate([
             leadingContraint,
             topConstraint,
-            contentLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Constants.padding),
+            contentLabel.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
             contentLabel.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor),
         ])
     }
@@ -57,11 +55,5 @@ final class AlbumsFooterView: UIView {
     private func setupUI() {
         addSubview(contentLabel)
         setupConstraints()
-    }
-}
-
-extension AlbumsFooterView {
-    private enum Constants {
-        static let padding: CGFloat = 16
     }
 }

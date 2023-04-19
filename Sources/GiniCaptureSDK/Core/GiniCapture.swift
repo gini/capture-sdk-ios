@@ -13,9 +13,11 @@ public typealias GiniCaptureNetworkDelegate = AnalysisDelegate & UploadDelegate
 /**
  Delegate to inform the reveiver about the current status of the Gini Capture SDK.
  Makes use of callbacks for handling incoming data and to control view controller presentation.
+ 
+ - note: Screen API only.
  */
 @objc public protocol GiniCaptureDelegate {
-
+    
     /**
      Called when the user has taken a picture or imported a file (image or PDF) from camera roll or document explorer
      
@@ -26,6 +28,25 @@ public typealias GiniCaptureNetworkDelegate = AnalysisDelegate & UploadDelegate
      */
     
     func didCapture(document: GiniCaptureDocument, networkDelegate: GiniCaptureNetworkDelegate)
+
+    /**
+     Called when the user has taken a picture or imported a file (image or PDF) from camera roll or document explorer
+     
+     - parameter document: `GiniCaptureDocument`
+     */
+    
+    @available(*, unavailable,
+    message: "Use didCapture(document: GiniCaptureDocument, networkDelegate: GiniCaptureNetworkDelegate) instead")
+    func didCapture(document: GiniCaptureDocument)
+    
+    /**
+     Called when the user has taken an image.
+     
+     - parameter imageData: JPEG image data including meta information or PDF data
+     */
+    @available(*, unavailable,
+    message: "Use didCapture(document: GiniCaptureDocument, uploadDelegate: UploadDelegate) instead")
+    func didCapture(_ imageData: Data)
     
     /**
      Called when the user has reviewed one or several documents.
@@ -37,6 +58,39 @@ public typealias GiniCaptureNetworkDelegate = AnalysisDelegate & UploadDelegate
 
      */
     func didReview(documents: [GiniCaptureDocument], networkDelegate: GiniCaptureNetworkDelegate)
+    
+    /**
+     Called when the user has reviewed the image and potentially rotated it to the correct orientation.
+     
+     - parameter document:  `GiniCaptureDocument`
+     - parameter changes:   Indicates whether `imageData` was altered.
+     */
+    @available(*, unavailable,
+    message: "Use didReview(documents: [GiniCaptureDocument]) instead")
+    func didReview(document: GiniCaptureDocument, withChanges changes: Bool)
+
+    /**
+     Called when the user has reviewed the image and potentially rotated it to the correct orientation.
+     
+     - parameter imageData:  JPEG image data including eventually updated meta information or PDF Data
+     - parameter changes:   Indicates whether `imageData` was altered.
+     */
+    @available(*, unavailable,
+    message: "Use didReview(documents: [GiniCaptureDocument]) instead")
+    func didReview(_ imageData: Data, withChanges changes: Bool)
+    
+    /**
+     Called when the user is presented with the analysis screen. Use the `analysisDelegate`
+     object to inform the user about the current status of the analysis task.
+     
+     - parameter analysisDelegate: The analysis delegate to send updates to.
+     */
+    @available(*, unavailable,
+    message: """
+    This method is no longer needed since the analysis should start
+    always in the didReview(documents:networkDelegate:) method
+    """)
+    @objc optional func didShowAnalysis(_ analysisDelegate: AnalysisDelegate)
     
     /**
      Called when the user cancels capturing on the camera screen.
@@ -51,16 +105,18 @@ public typealias GiniCaptureNetworkDelegate = AnalysisDelegate & UploadDelegate
     func didCancelReview(for document: GiniCaptureDocument)
     
     /**
+     Called when the user navigates back from the review screen to the camera potentially to
+     retake an image. Should be used to cancel any ongoing analysis task on the image.
+     */
+    @available(*, unavailable, message: "Use didCancelReview(for: GiniCaptureDocument) instead")
+    func didCancelReview()
+    
+    /**
      Called when the user navigates back from the analysis screen to the review screen.
      It is used to cancel any ongoing analysis task on the image.
      */
     func didCancelAnalysis()
     
-    /**
-     Called when the 'Enter Manually' was pressed within No Result screen
-     */
-    func didPressEnterManually()
-
 }
 
 /**
@@ -99,7 +155,9 @@ public typealias GiniCaptureNetworkDelegate = AnalysisDelegate & UploadDelegate
     
     /**
      Returns a view controller which will handle the analysis process.
-          
+     
+     - note: Screen API only.
+     
      - parameter delegate: An instance conforming to the `GiniCaptureDelegate` protocol.
      - parameter importedDocuments: Documents that come from a source different than `CameraViewController`.
      There should be either images or one PDF, and they should be validated before calling this method.
@@ -116,6 +174,8 @@ public typealias GiniCaptureNetworkDelegate = AnalysisDelegate & UploadDelegate
     
     /**
      Returns a view controller which will handle the analysis process.
+     
+     - note: Screen API only.
      
      - parameter delegate: An instance conforming to the `GiniCaptureDelegate` protocol.
      - parameter importedDocuments: Documents that come from a source different than `CameraViewController`.
@@ -135,6 +195,8 @@ public typealias GiniCaptureNetworkDelegate = AnalysisDelegate & UploadDelegate
     
     /**
      Returns a view controller which will handle the analysis process.
+
+     - note: Screen API only.
      
      - parameter delegate: An instance conforming to the `GiniCaptureDelegate` protocol.
      - parameter importedDocument: Documents that come from a source different than CameraViewController.
@@ -155,6 +217,8 @@ public typealias GiniCaptureNetworkDelegate = AnalysisDelegate & UploadDelegate
     
     /**
      Returns a view controller which will handle the analysis process.
+
+     - note: Screen API only.
      
      - parameter delegate: An instance conforming to the `GiniCaptureDelegate` protocol.
      - parameter importedDocument: Documents that come from a source different than CameraViewController.
@@ -178,6 +242,8 @@ public typealias GiniCaptureNetworkDelegate = AnalysisDelegate & UploadDelegate
      Returns a view controller which will handle the analysis process.
      Allows to set a custom configuration to change the look and feel of the Gini Capture SDK.
      
+     - note: Screen API only.
+     
      - parameter delegate:      An instance conforming to the `GiniCaptureDelegate` protocol.
      - parameter configuration: The configuration to set.
      - parameter importedDocument: Documents that come from a source different than CameraViewController.
@@ -195,6 +261,8 @@ public typealias GiniCaptureNetworkDelegate = AnalysisDelegate & UploadDelegate
     /**
      Returns a view controller which will handle the analysis process.
      Allows to set a custom configuration to change the look and feel of the Gini Capture SDK.
+     
+     - note: Screen API only.
      
      - parameter delegate:      An instance conforming to the `GiniCaptureDelegate` protocol.
      - parameter configuration: The configuration to set.

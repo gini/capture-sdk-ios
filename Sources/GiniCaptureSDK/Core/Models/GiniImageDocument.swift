@@ -25,9 +25,7 @@ final public class GiniImageDocument: NSObject, GiniCaptureDocument {
     public var rotationDelta: Int { // Should be normalized to be in [0, 360)
         return self.metaInformationManager.imageRotationDeltaDegrees()
     }
-
-    // A flag to determine if the document is opened from another app or from the SDK
-    public var isFromOtherApp: Bool
+    
     fileprivate let metaInformationManager: ImageMetaInformationManager
     
     /**
@@ -40,37 +38,35 @@ final public class GiniImageDocument: NSObject, GiniCaptureDocument {
      */
     
     init(data: Data,
-         processedImageData: Data? = nil,
          imageSource: DocumentSource,
          imageImportMethod: DocumentImportMethod? = nil,
          deviceOrientation: UIInterfaceOrientation? = nil) {
-        self.previewImage = UIImage(data: processedImageData ?? data)
+        self.previewImage = UIImage(data: data)
         self.isReviewable = true
         self.id = UUID().uuidString
-
-        switch imageSource {
-        case .appName(name: _) :
-            isFromOtherApp = true
-        default:
-            isFromOtherApp = false
-        }
-
         self.isImported = imageSource != DocumentSource.camera
         self.metaInformationManager = ImageMetaInformationManager(imageData: data,
                                                                   deviceOrientation: deviceOrientation,
                                                                   imageSource: imageSource,
                                                                   imageImportMethod: imageImportMethod)
-
-        // The processed image data is assumed to be always in the correct orientation
-        if processedImageData != nil {
-            self.metaInformationManager.update(imageOrientation: .up)
-        }
         
-        if let dataWithMetadata = metaInformationManager.imageByAddingMetadata(to: processedImageData) {
+        if let dataWithMetadata = metaInformationManager.imageByAddingMetadata() {
             self.data = dataWithMetadata
         } else {
             self.data = data
-        }        
+        }
+        
+    }
+    
+    func rotatePreviewImage90Degrees() {
+        guard let rotatedImage = self.previewImage?.rotated90Degrees() else { return }
+        metaInformationManager.rotate(degrees: 90, imageOrientation: rotatedImage.imageOrientation)
+        
+        if let data = metaInformationManager.imageByAddingMetadata() {
+            self.previewImage = UIImage(data: data)
+        } else {
+            self.previewImage = rotatedImage
+        }
     }
 }
 
