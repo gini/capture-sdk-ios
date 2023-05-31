@@ -8,12 +8,6 @@
 import UIKit
 import GiniBankAPILibrary
 
-/**
-    Static veriable for synchronization to prevent display of multiple error screens at the same time
-*/
-
-var errorOccurred = false
-
 public final class DocumentService: DocumentServiceProtocol {
     
     var partialDocuments: [String: PartialDocument] = [:]
@@ -47,20 +41,10 @@ public final class DocumentService: DocumentServiceProtocol {
                 
                 completion?(.success(createdDocument))
             case .failure(let error):
-                DispatchQueue.main.async {
-                    guard errorOccurred == false else {
-                        return
-                    }
-                    errorOccurred = true
-                    DispatchQueue.global().async {
-                        completion?(.failure(error))
-                    }
-                }
+                completion?(.failure(error))
             }
         }
     }
-    
-    
     
     public func startAnalysis(completion: @escaping AnalysisCompletion) {
         let partialDocumentsInfoSorted = partialDocuments
@@ -76,14 +60,8 @@ public final class DocumentService: DocumentServiceProtocol {
                 self.document = createdDocument
                 completion(.success(extractionResult))
             case let .failure(error):
-                DispatchQueue.main.async {
-                    guard errorOccurred == false else {
-                        return
-                    }
-                    errorOccurred = true
-                    DispatchQueue.global().async {
-                        completion(.failure(error))
-                    }
+                if error != .requestCancelled {
+                    completion(.failure(error))
                 }
             }
         }
