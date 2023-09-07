@@ -15,10 +15,12 @@ The delegate is separated into smaller protocols relating to different parts of 
  
 - note: The delegate isn't retained by Gini Capture SDK. It should be retained by the client code.
 */
-public protocol GiniCaptureTrackingDelegate: OnboardingScreenTrackingDelegate,
-                                             CameraScreenTrackingDelegate,
-                                             ReviewScreenTrackingDelegate,
-                                             AnalysisScreenTrackingDelegate { }
+public protocol GiniCaptureTrackingDelegate:
+    OnboardingScreenTrackingDelegate
+    & CameraScreenTrackingDelegate
+    & ReviewScreenTrackingDelegate
+    & AnalysisScreenTrackingDelegate
+{}
 
 /**
 Event types relating to onboarding.
@@ -34,6 +36,7 @@ public enum OnboardingScreenEventType: String {
 Tracking delegate relating to onboarding.
 */
 public protocol OnboardingScreenTrackingDelegate: AnyObject {
+    
     func onOnboardingScreenEvent(event: Event<OnboardingScreenEventType>)
 }
 
@@ -53,6 +56,7 @@ public enum CameraScreenEventType: String {
 Tracking delegate relating to the camera screen.
 */
 public protocol CameraScreenTrackingDelegate: AnyObject {
+    
     func onCameraScreenEvent(event: Event<CameraScreenEventType>)
 }
 
@@ -70,6 +74,7 @@ public enum ReviewScreenEventType: String {
 Tracking delegate relating to the review screen.
 */
 public protocol ReviewScreenTrackingDelegate: AnyObject {
+    
     func onReviewScreenEvent(event: Event<ReviewScreenEventType>)
 }
 
@@ -89,5 +94,6 @@ public enum AnalysisScreenEventType: String {
 Tracking delegate relating to the analysis screen.
 */
 public protocol AnalysisScreenTrackingDelegate: AnyObject {
+    
     func onAnalysisScreenEvent(event: Event<AnalysisScreenEventType>)
 }

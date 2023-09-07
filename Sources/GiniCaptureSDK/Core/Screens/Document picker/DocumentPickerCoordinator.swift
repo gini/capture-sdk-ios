@@ -12,6 +12,8 @@ import UIKit
 /**
  The CameraViewControllerDelegate protocol defines methods that allow you to handle picked documents from both
  Gallery and Files Explorer.
+
+ - note: Component API only.
  */
 public protocol DocumentPickerCoordinatorDelegate: AnyObject {
     /**
@@ -55,8 +57,11 @@ public protocol DocumentPickerCoordinatorDelegate: AnyObject {
  the `delegate` property.
  When using multipage and having imported/captured images, you have to update the `isPDFSelectionAllowed`
  property before showing the File explorer in order to filter out PDFs.
+
+ - note: Component API only.
  */
 
+// swiftlint:disable file_length
 public final class DocumentPickerCoordinator: NSObject {
     /**
      The object that acts as the delegate of the document picker coordinator.
@@ -190,6 +195,13 @@ public final class DocumentPickerCoordinator: NSObject {
                                         for: .normal)
         }
 
+        // This is needed since the UIDocumentPickerViewController on iPad is presented over the current view controller
+        // without covering the previous screen. This causes that the `viewWillAppear` method is not being called
+        // in the current view controller.
+        if !device.isIpad {
+            setStatusBarStyle(to: .default)
+        }
+
         currentPickerDismissesAutomatically = true
         currentPickerViewController = documentPicker
 
@@ -215,25 +227,24 @@ public final class DocumentPickerCoordinator: NSObject {
 // MARK: - Fileprivate methods
 
 fileprivate extension DocumentPickerCoordinator {
-    func createDocument(fromData dataDictionary: (Data?, String?)) -> GiniCaptureDocument? {
-        guard let data = dataDictionary.0 else { return nil }
+    func createDocument(fromData data: Data) -> GiniCaptureDocument? {
         let documentBuilder = GiniCaptureDocumentBuilder(documentSource: .external)
         documentBuilder.importMethod = .picker
 
-        return documentBuilder.build(with: data, fileName: dataDictionary.1)
+        return documentBuilder.build(with: data)
     }
 
-    func data(fromUrl url: URL) -> (Data?, String?) {
+    func data(fromUrl url: URL) -> Data? {
         do {
             _ = url.startAccessingSecurityScopedResource()
             let data = try Data(contentsOf: url)
             url.stopAccessingSecurityScopedResource()
-            return (data, url.lastPathComponent)
+            return data
         } catch {
             url.stopAccessingSecurityScopedResource()
         }
 
-        return (nil, nil)
+        return nil
     }
 
     func saveCurrentNavBarAppearance() {
@@ -314,7 +325,7 @@ extension DocumentPickerCoordinator: UIDocumentPickerDelegate {
             return
         }
 
-        if #available(iOS 12.0, *), giniConfiguration.documentPickerNavigationBarTintColor != nil {
+        if #available(iOS 11.0, *), giniConfiguration.documentPickerNavigationBarTintColor != nil {
             restoreSavedNavBarAppearance()
         }
 
@@ -326,7 +337,7 @@ extension DocumentPickerCoordinator: UIDocumentPickerDelegate {
     }
 
     public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-        if #available(iOS 12.0, *), giniConfiguration.documentPickerNavigationBarTintColor != nil {
+        if #available(iOS 11.0, *), giniConfiguration.documentPickerNavigationBarTintColor != nil {
             restoreSavedNavBarAppearance()
         }
 
