@@ -20,16 +20,51 @@ public func giniCaptureBundle() -> Bundle {
  - returns: Image if found with name.
  */
 public func UIImageNamedPreferred(named name: String) -> UIImage? {
-    if let mainBundleImage = UIImage(named: name, in: Bundle.main, compatibleWith: nil) {
+    if let mainBundleImage = UIImage(named: name,
+                                     in: Bundle.main,
+                                     compatibleWith: nil) {
         return mainBundleImage
+    }
+    if let customBundle = GiniConfiguration.shared.customResourceBundle,
+       let customBundleImage = UIImage(named: name,
+                                       in: customBundle,
+                                       compatibleWith: nil) {
+        return customBundleImage
+    }
+    
+    return UIImage(named: name,
+                   in: giniCaptureBundle(),
+                   compatibleWith: nil)
+}
+
+/**
+ Returns an optional `UIColor` instance with the given `name` preferably from the client's bundle.
+ 
+ - parameter name: The name of the UIColor from `GiniColors` asset catalog.
+ 
+ - returns: color if found with name.
+ */
+public func UIColorPreferred(named name: String) -> UIColor {
+    if let mainBundleColor = UIColor(named: name,
+                                     in: Bundle.main,
+                                     compatibleWith: nil) {
+        return mainBundleColor
     }
     
     if let customBundle = GiniConfiguration.shared.customResourceBundle,
-       let customBundleImage = UIImage(named: name, in: customBundle, compatibleWith: nil) {
-        return customBundleImage
+        let customBundleColor = UIColor(named: name,
+                                        in: customBundle,
+                                        compatibleWith: nil) {
+        return customBundleColor
     }
-   
-    return UIImage(named: name, in: giniCaptureBundle(), compatibleWith: nil)
+    
+    if let color = UIColor(named: name,
+                           in: giniCaptureBundle(),
+                           compatibleWith: nil) {
+        return color
+    } else {
+        fatalError("The color named '\(name)' does not exist.")
+    }
 }
 
 /**
@@ -45,12 +80,18 @@ public func NSLocalizedStringPreferredFormat(_ key: String,
                                              comment: String,
                                              isCustomizable: Bool = true) -> String {
     if isCustomizable {
-        if let clientLocalizedStringMainBundle = clientLocalizedString(key, fallbackKey: fallbackKey, comment: comment, bundle: .main) {
+        if let clientLocalizedStringMainBundle = clientLocalizedString(key,
+                                                                       fallbackKey: fallbackKey,
+                                                                       comment: comment,
+                                                                       bundle: .main) {
             
             return clientLocalizedStringMainBundle
             
         } else if let customBundle = GiniConfiguration.shared.customResourceBundle,
-                  let clientLocalizedStringCustomBundle = clientLocalizedString(key, fallbackKey: fallbackKey, comment: comment, bundle: customBundle) {
+                  let clientLocalizedStringCustomBundle = clientLocalizedString(key,
+                                                                                fallbackKey: fallbackKey,
+                                                                                comment: comment,
+                                                                                bundle: customBundle) {
             
             return clientLocalizedStringCustomBundle
         }
@@ -59,16 +100,43 @@ public func NSLocalizedStringPreferredFormat(_ key: String,
     return giniLocalizedString(key, fallbackKey: fallbackKey, comment: comment)
 }
 
+private func giniLocalizedString(_ key: String,
+                                 fallbackKey: String,
+                                 comment: String) -> String {
+    let giniBundle = giniCaptureBundle()
+    
+    var defaultFormat = NSLocalizedString(key,
+                                          bundle: giniBundle,
+                                          comment: comment)
+    
+    if defaultFormat.lowercased() == key.lowercased() {
+        defaultFormat = NSLocalizedString(fallbackKey,
+                                          bundle: giniBundle,
+                                          comment: comment)
+    }
+    return defaultFormat
+}
+
 private func clientLocalizedString(_ key: String,
                                    fallbackKey: String,
                                    comment: String,
                                    bundle: Bundle) -> String? {
-    var clientString = NSLocalizedString(key, bundle: bundle, comment: comment)
-    var fallbackClientString = NSLocalizedString(fallbackKey, bundle: bundle, comment: comment)
+    var clientString = NSLocalizedString(key,
+                                         bundle: bundle,
+                                         comment: comment)
+    var fallbackClientString = NSLocalizedString(fallbackKey,
+                                                 bundle: bundle,
+                                                 comment: comment)
     
     if let localizedResourceName = GiniConfiguration.shared.localizedStringsTableName {
-        clientString = NSLocalizedString(key, tableName: localizedResourceName, bundle: bundle, comment: comment)
-        fallbackClientString = NSLocalizedString(fallbackKey,tableName: localizedResourceName, bundle: bundle, comment: comment)
+        clientString = NSLocalizedString(key,
+                                         tableName: localizedResourceName,
+                                         bundle: bundle,
+                                         comment: comment)
+        fallbackClientString = NSLocalizedString(fallbackKey,
+                                                 tableName: localizedResourceName,
+                                                 bundle: bundle,
+                                                 comment: comment)
     }
     
     guard (clientString.lowercased() != key.lowercased() || fallbackClientString.lowercased() != fallbackKey.lowercased()) else {
@@ -78,20 +146,6 @@ private func clientLocalizedString(_ key: String,
     return clientString
 }
 
-private func giniLocalizedString(_ key: String,
-                                 fallbackKey: String,
-                                 comment: String) -> String {
-    let bundle = giniCaptureBundle()
-    
-    var defaultFormat = NSLocalizedString(key, bundle: bundle, comment: comment)
-    
-    if defaultFormat.lowercased() == key.lowercased() {
-        defaultFormat = NSLocalizedString(fallbackKey, bundle: bundle, comment: comment)
-    }
-    
-    return defaultFormat
-}
-
 struct AnimationDuration {
     static var slow = 1.0
     static var medium = 0.6
@@ -99,11 +153,10 @@ struct AnimationDuration {
 }
 
 public class Constraints {
-    
     enum Position {
         case top, bottom, right, left
     }
-    
+
     public class func active(item view1: Any!,
                              attr attr1: NSLayoutConstraint.Attribute,
                              relatedBy relation: NSLayoutConstraint.Relation,
@@ -113,7 +166,6 @@ public class Constraints {
                              constant: CGFloat = 0,
                              priority: Float = 1000,
                              identifier: String? = nil) {
-        
         let constraint = NSLayoutConstraint(item: view1!,
                                             attribute: attr1,
                                             relatedBy: relation,
@@ -122,7 +174,7 @@ public class Constraints {
                                             constant: constant)
         active(constraint: constraint, priority: priority, identifier: identifier)
     }
-    
+
     class func active(constraint: NSLayoutConstraint,
                       priority: Float = 1000,
                       identifier: String? = nil) {
@@ -130,87 +182,32 @@ public class Constraints {
         constraint.identifier = identifier
         constraint.isActive = true
     }
-    
+
     class func pin(view: UIView,
                    toSuperView superview: UIView,
                    positions: [Position] = [.top, .bottom, .left, .right]) {
-        
+
         if positions.contains(.top) {
             Constraints.active(item: view, attr: .top, relatedBy: .equal, to: superview, attr: .top)
         }
-        
+
         if positions.contains(.bottom) {
             Constraints.active(item: view, attr: .bottom, relatedBy: .equal, to: superview, attr: .bottom)
         }
-        
+
         if positions.contains(.left) {
             Constraints.active(item: view, attr: .leading, relatedBy: .equal, to: superview, attr: .leading)
         }
-        
+
         if positions.contains(.right) {
             Constraints.active(item: view, attr: .trailing, relatedBy: .equal, to: superview, attr: .trailing)
         }
     }
-    
+
     class func center(view: UIView, with otherView: UIView) {
         Constraints.active(item: view, attr: .centerX, relatedBy: .equal, to: otherView, attr: .centerX)
         Constraints.active(item: view, attr: .centerY, relatedBy: .equal, to: otherView, attr: .centerY)
     }
-    
-}
-
-public struct Colors {
-    
-    public struct Gini {
-        
-        public static var blue = UIColor.from(hex: 0x009edc)
-        public static var bluishGreen = UIColor.from(hex: 0x007c99)
-        public static var crimson = UIColor.from(hex: 0xFF4F65)
-        public static var lightBlue = UIColor.from(hex: 0x74d1f5)
-        public static var grey = UIColor.from(hex: 0xAFB2B3)
-        public static var raspberry = UIColor.from(hex: 0xe30b5d)
-        public static var rose = UIColor.from(hex: 0xFC6B7E)
-        public static var pearl = UIColor.from(hex: 0xF2F2F2)
-        public static var nero = UIColor.from(hex: 0x1c1c1c)
-        public static var charcoalGray = UIColor.from(hex: 0x1c1c1e)
-        public static var paleGreen = UIColor.from(hex: 0xB8E986)
-        public static var springGreen = UIColor.from(hex: 0x00FA9A)
-        public static var veryLightGray = UIColor.from(hex: 0xD8D8D8)
-        public static var eclipseGray = UIColor.from(hex: 0x3A3A3A)
-        
-        @available(iOS 13.0, *)
-        public static var dynamicPearl = UIColor { (traitCollection: UITraitCollection) -> UIColor in
-            traitCollection.userInterfaceStyle == .dark ? nero : pearl
-        }
-        
-        @available(iOS 13.0, *)
-        public static var dynamicVeryLightGray = UIColor { (traitCollection: UITraitCollection) -> UIColor in
-            traitCollection.userInterfaceStyle == .dark ? eclipseGray : veryLightGray
-        }
-        
-        @available(iOS 13.0, *)
-        public static var shadowColor = UIColor { (traitCollection: UITraitCollection) -> UIColor in
-            traitCollection.userInterfaceStyle == .dark ? .white : .black
-        }
-        
-        public static var systemBackgroundColor: UIColor = {
-            if #available(iOS 13.0, *) {
-                return .systemBackground
-            } else {
-                return .white
-            }
-        }()
-    }
-}
-
-/**
-    Set the status bar style when ViewControllerBasedStatusBarAppearance is disabled.
-    If it is enabled it will not have effect.
- */
-
-func setStatusBarStyle(to statusBarStyle: UIStatusBarStyle,
-                       application: UIApplication = UIApplication.shared) {
-    application.setStatusBarStyle(statusBarStyle, animated: true)
 }
 
 /**
@@ -226,7 +223,6 @@ func measure(block: () -> Void) {
 private class CaptureSDKBundleFinder {}
 
 extension Foundation.Bundle {
-    
     /**
      The resource bundle associated with the current module.
      - important: When `GiniCaptureSDK` is distributed via Swift Package Manager, it will be synthesized automatically in the name of `Bundle.module`.
@@ -234,7 +230,6 @@ extension Foundation.Bundle {
     static var resource: Bundle = {
         let moduleName = "GiniCaptureSDK"
         let bundleName = "\(moduleName)_\(moduleName)"
-        
         let candidates = [
             // Bundle should be present here when the package is linked into an App.
             Bundle.main.resourceURL,
@@ -243,8 +238,7 @@ extension Foundation.Bundle {
             Bundle(for: CaptureSDKBundleFinder.self).resourceURL,
 
             // For command-line tools.
-            Bundle.main.bundleURL,
-        ]
+            Bundle.main.bundleURL]
 
         for candidate in candidates {
             let bundlePath = candidate?.appendingPathComponent(bundleName + ".bundle")
@@ -254,4 +248,8 @@ extension Foundation.Bundle {
         }
         return Bundle(for: GiniCapture.self)
     }()
+}
+
+public struct RoundedCorners {
+    static let cornerRadius: CGFloat = 8
 }
