@@ -1,9 +1,7 @@
 //
 //  GiniScreenAPICoordinator.swift
-//  GiniCapture
 //
-//  Created by Enrique del Pozo Gómez on 12/19/17.
-//  Copyright © 2017 Gini GmbH. All rights reserved.
+//  Copyright © 2024 Gini GmbH. All rights reserved.
 //
 
 import Foundation
@@ -87,10 +85,8 @@ open class GiniScreenAPICoordinator: NSObject, Coordinator {
         super.init()
     }
 
-    public func start(
-        withDocuments documents: [GiniCaptureDocument]?,
-        animated: Bool = false
-    ) -> UIViewController {
+    public func start(withDocuments documents: [GiniCaptureDocument]?,
+                      animated: Bool = false) -> UIViewController {
         var viewControllers: [UIViewController] = []
 
         if let documents = documents, !documents.isEmpty {
@@ -142,8 +138,7 @@ open class GiniScreenAPICoordinator: NSObject, Coordinator {
         }
 
         if pages.type == .image {
-            reviewViewController =
-                createReviewScreenContainer(with: pages)
+            reviewViewController = createReviewScreenContainer(with: pages)
 
             return [reviewViewController]
         } else {
@@ -201,35 +196,67 @@ extension GiniScreenAPICoordinator {
     @objc func back() {
         switch screenAPINavigationController.topViewController {
         case is CameraViewController:
-            trackingDelegate?.onCameraScreenEvent(event: Event(type: .exit))
-
-            if pages.type == .qrcode {
-                screenAPINavigationController.dismiss(animated: true)
-            }
-
-            if pages.count > 0 {
-                if screenAPINavigationController.viewControllers.count > 1 {
-                    screenAPINavigationController.popViewController(animated: true)
-                } else {
-                    screenAPINavigationController.dismiss(animated: true)
-                }
-            } else {
-                closeScreenApi()
-            }
+            navigateBackFromCameraViewController()
         case is AnalysisViewController:
-            trackingDelegate?.onAnalysisScreenEvent(event: Event(type: .cancel))
-            screenAPINavigationController.dismiss(animated: true)
+            navigateBackFromAnalysisViewController()
         default:
-            if screenAPINavigationController.viewControllers.count > 1 {
-                screenAPINavigationController.popViewController(animated: true)
-            } else {
-                screenAPINavigationController.dismiss(animated: true)
-            }
+            navigateBack()
         }
     }
 
-    @objc func closeScreenApi() {
-        self.visionDelegate?.didCancelCapturing()
+    @objc func finishWithCancellation() {
+        if let delegate = self.visionDelegate {
+            delegate.didCancelCapturing()
+        } else {
+            Log(message: "GiniCaptureResultsDelegate is not implemented", event: .error)
+        }
+    }
+
+    @objc func finishWithEnterManually() {
+        if let delegate = self.visionDelegate {
+            delegate.didPressEnterManually()
+        } else {
+            Log(message: "GiniCaptureResultsDelegate is not implemented", event: .error)
+        }
+    }
+
+    private func navigateBackFromCameraViewController() {
+        trackingDelegate?.onCameraScreenEvent(event: Event(type: .exit))
+        GiniAnalyticsManager.track(event: .closeTapped, screenName: screenName())
+        guard pages.type != .qrcode else {
+            finishWithCancellation()
+            return
+        }
+
+        if pages.count > 0 {
+            navigateBack()
+        } else {
+            finishWithCancellation()
+        }
+    }
+
+    private func navigateBackFromAnalysisViewController() {
+        trackingDelegate?.onAnalysisScreenEvent(event: Event(type: .cancel))
+        GiniAnalyticsManager.track(event: .closeTapped, screenName: .analysis)
+        finishWithCancellation()
+    }
+
+    private func navigateBack() {
+        if screenAPINavigationController.viewControllers.count > 1 {
+            screenAPINavigationController.popViewController(animated: true)
+        } else {
+            finishWithCancellation()
+        }
+    }
+
+    // Determine the screen name based on the top view controller
+    private func screenName() -> GiniAnalyticsScreen {
+        if let topViewController = screenAPINavigationController.topViewController as? CameraViewController,
+           !topViewController.cameraPreviewViewController.isAuthorized {
+            return .cameraAccess
+        } else {
+            return .camera
+        }
     }
 
     @objc func showHelpMenuScreen() {
@@ -238,16 +265,17 @@ extension GiniScreenAPICoordinator {
             return
         }
 
-        let helpMenuViewController = HelpMenuViewController(
-            giniConfiguration: giniConfiguration
-        )
+        GiniAnalyticsManager.track(event: .helpTapped, screenName: screenName())
+
+        let helpMenuViewController = HelpMenuViewController(giniConfiguration: giniConfiguration)
+
         helpMenuViewController.delegate = self
         trackingDelegate?.onCameraScreenEvent(event: Event(type: .help))
 
         let backButtonTitle = NSLocalizedStringPreferredFormat("ginicapture.navigationbar.help.backToCamera",
                                                                comment: "Camera")
         let barButton = GiniBarButton(ofType: .back(title: backButtonTitle))
-        barButton.addAction(self, #selector(back))
+        barButton.addAction(self, #selector(backToCameraTapped))
         helpMenuViewController.navigationItem.leftBarButtonItem = barButton.barButton
 
         // In case of 1 menu item it's better to show the item immediately without any selection
@@ -258,6 +286,11 @@ extension GiniScreenAPICoordinator {
 
         screenAPINavigationController.pushViewController(helpViewControllerToPush, animated: true)
 
+    }
+
+    @objc func backToCameraTapped() {
+        GiniAnalyticsManager.track(event: .closeTapped, screenName: .help)
+        back()
     }
 
     @objc func showAnalysisScreen() {
@@ -285,11 +318,10 @@ extension GiniScreenAPICoordinator {
 // MARK: - Navigation delegate
 
 extension GiniScreenAPICoordinator: UINavigationControllerDelegate {
-    public func navigationController(
-        _ navigationController: UINavigationController,
-        animationControllerFor operation: UINavigationController.Operation,
-        from fromVC: UIViewController,
-        to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+    public func navigationController(_ navigationController: UINavigationController,
+                                     animationControllerFor operation: UINavigationController.Operation,
+                                     from fromVC: UIViewController,
+                                     to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         if fromVC is AnalysisViewController {
             analysisViewController = nil
             if operation == .pop {

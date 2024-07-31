@@ -28,6 +28,7 @@ public enum BarButtonType {
     case help
     case back(title: String)
     case done
+    case skip
 }
 
 /**
@@ -151,6 +152,9 @@ public final class GiniBarButton {
             buttonTitle = NSLocalizedStringPreferredFormat("ginicapture.imagepicker.openbutton",
                                                            comment: "Done")
             icon = UIImageNamedPreferred(named: "barButton_done")
+        case .skip:
+            buttonTitle = NSLocalizedStringPreferredFormat("ginicapture.onboarding.skip",
+                                                           comment: "Skip button")
         }
 
         let buttonTitleIsEmpty = buttonTitle == nil || buttonTitle!.isEmpty
@@ -187,6 +191,18 @@ public final class GiniBarButton {
         }
 
         return attributes
+    }
+
+    public func setContentHuggingPriority(_ priority: UILayoutPriority, for axis: NSLayoutConstraint.Axis) {
+        stackView.setContentHuggingPriority(priority, for: axis)
+        titleLabel.setContentHuggingPriority(priority, for: axis)
+        imageView.setContentHuggingPriority(priority, for: axis)
+    }
+
+    public func setContentCompressionResistancePriority(_ priority: UILayoutPriority, for axis: NSLayoutConstraint.Axis) {
+        stackView.setContentCompressionResistancePriority(priority, for: axis)
+        titleLabel.setContentCompressionResistancePriority(priority, for: axis)
+        imageView.setContentCompressionResistancePriority(priority, for: axis)
     }
 }
 
