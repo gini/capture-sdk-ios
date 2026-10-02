@@ -1,132 +1,15 @@
 //
 //  QRCodeOverlay.swift
 //  
-//
-//  Created by David Vizaknai on 01.11.2022.
+//  Copyright © 2025 Gini GmbH. All rights reserved.
 //
 
 import UIKit
 import GiniUtilites
 
-final class CorrectQRCodeTextContainer: UIView {
-    private let configuration = GiniConfiguration.shared
-
-    lazy var titleLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = configuration.textStyleFonts[.caption2]
-        label.textAlignment = .center
-        label.textColor = .GiniCapture.light1
-        label.text = NSLocalizedStringPreferredFormat("ginicapture.QRscanning.correct",
-                                                      comment: "QR Detected")
-        label.enableScaling()
-        return label
-    }()
-
-    init() {
-        super.init(frame: .zero)
-        backgroundColor = .GiniCapture.success2
-        addSubview(titleLabel)
-        setupConstraints()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: Constants.spacing / 2),
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Constants.spacing)
-        ])
-    }
-}
-
-final class IncorrectQRCodeTextContainer: UIView {
-    private let configuration = GiniConfiguration.shared
-
-    private lazy var titleLabel: UILabel = {
-        let label = UILabel()
-        label.font = configuration.textStyleFonts[.footnoteBold]
-        label.textColor = .GiniCapture.dark1
-        label.text = NSLocalizedStringPreferredFormat("ginicapture.QRscanning.incorrect.title",
-                                                      comment: "Unknown QR")
-        label.enableScaling()
-        label.numberOfLines = 0
-        return label
-    }()
-
-    private lazy var descriptionLabel: UILabel = {
-        let label = UILabel()
-        label.font = configuration.textStyleFonts[.footnote]
-        label.textColor = .GiniCapture.dark1
-        label.numberOfLines = 0
-        label.text = NSLocalizedStringPreferredFormat("ginicapture.QRscanning.incorrect.description",
-                                                      comment: "No content")
-        label.enableScaling()
-        return label
-    }()
-
-    private lazy var textStackView: UIStackView = {
-        let textStackView = UIStackView()
-        configureTextStackView(textStackView)
-        return textStackView
-    }()
-
-    private func configureTextStackView(_ stackView: UIStackView) {
-        stackView.axis = .vertical
-        stackView.distribution = .fill
-        stackView.spacing = Constants.spacing
-        stackView.backgroundColor = .GiniCapture.warning3
-        stackView.layer.cornerRadius = Constants.cornerRadius
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-
-        stackView.isLayoutMarginsRelativeArrangement = true
-        stackView.layoutMargins = Constants.stackViewMargins
-    }
-
-    private lazy var scrollView: UIScrollView = {
-        let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        return scrollView
-    }()
-
-    init() {
-        super.init(frame: .zero)
-
-        backgroundColor = .clear
-        addSubview(scrollView)
-        scrollView.addSubview(textStackView)
-        textStackView.addArrangedSubview(titleLabel)
-        textStackView.addArrangedSubview(descriptionLabel)
-        setupConstraints()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
-
-            // textStackView inside scrollView
-            textStackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            textStackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            textStackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            textStackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            textStackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
-        ])
-    }
-}
-
 final class QRCodeOverlay: UIView {
     private let configuration = GiniConfiguration.shared
+    private let viewModel: QRCodeOverlayViewModel
     private var educationViewModel: QRCodeEducationLoadingViewModel?
     private var educationLoadingView: QRCodeEducationLoadingView?
     private let useCustomLoadingView: Bool = true
@@ -161,7 +44,7 @@ final class QRCodeOverlay: UIView {
 
     private lazy var checkMarkImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImageNamedPreferred(named: "greenCheckMark")
+        imageView.image = Images.checkMark
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.isHidden = true
         return imageView
@@ -183,8 +66,7 @@ final class QRCodeOverlay: UIView {
         loadingIndicatorText.textColor = .GiniCapture.light1
         loadingIndicatorText.isAccessibilityElement = true
         loadingIndicatorText.numberOfLines = 0
-        loadingIndicatorText.text = NSLocalizedStringPreferredFormat("ginicapture.QRscanning.loading",
-                                                                     comment: "Retrievenig invoice")
+        loadingIndicatorText.text = Strings.loadingIndicatorText
         return loadingIndicatorText
     }()
 
@@ -198,7 +80,15 @@ final class QRCodeOverlay: UIView {
         return textStackView
     }()
 
-    init() {
+    private var poweredByGiniBadgeView: PoweredByGiniBadgeView?
+    private var poweredByGiniLoadingIndicatorView: PoweredByGiniLoadingIndicatorView?
+
+    /**
+     Injectable VM defaulting to `LiveQRCodeOverlayViewModel` (production reads
+     `GiniCaptureUserDefaultsStorage.ingredientBrandScreens`); tests inject a stub.
+     */
+    init(viewModel: QRCodeOverlayViewModel = LiveQRCodeOverlayViewModel()) {
+        self.viewModel = viewModel
         super.init(frame: .zero)
         addSubview(correctQRFeedback)
         addSubview(checkMarkImageView)
@@ -209,6 +99,15 @@ final class QRCodeOverlay: UIView {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window != nil {
+            poweredByGiniLoadingIndicatorView?.startAnimation()
+        } else {
+            poweredByGiniLoadingIndicatorView?.stopAnimation()
+        }
     }
 
     private func addLoadingView() {
@@ -241,6 +140,23 @@ final class QRCodeOverlay: UIView {
         addSubview(view)
     }
 
+    /**
+     Adds the "Powered by Gini" badge if the Analysis screen is enabled, inserted hidden.
+     Visibility is toggled by `configureQrCodeOverlay(withCorrectQrCode:)`.
+     */
+    private func addPoweredByGiniBadgeIfEnabled() {
+        guard viewModel.isIngredientBrandEnabled else { return }
+
+        let badge = PoweredByGiniBadgeView()
+        badge.isHidden = true
+        addSubview(badge)
+        badge.giniMakeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(safeBottom).constant(-Constants.badgeBottomInset)
+        }
+        poweredByGiniBadgeView = badge
+    }
+
     private func addOriginalLoadingView() {
         let loadingIndicator: UIView
 
@@ -253,6 +169,43 @@ final class QRCodeOverlay: UIView {
         addSubview(loadingContainer)
         loadingContainer.addArrangedSubview(loadingIndicator)
         loadingContainer.addArrangedSubview(loadingIndicatorText)
+    }
+
+    /**
+     Builds the animated Gini "g" loading indicator when the Analysis screen is
+     ingredient-branded and the HEIC asset decoded successfully. Returns `nil`
+     otherwise so callers fall back to the standard `UIActivityIndicatorView`.
+     */
+    private func makeBrandedLoadingIndicatorIfEnabled() -> PoweredByGiniLoadingIndicatorView? {
+        guard viewModel.isIngredientBrandEnabled else {
+            return nil
+        }
+        let indicator = PoweredByGiniLoadingIndicatorView()
+        guard indicator.hasValidAsset else {
+            Log("Gini ingredient-brand loading indicator asset failed to load; falling back to UIActivityIndicatorView",
+                event: .error)
+            return nil
+        }
+        return indicator
+    }
+
+    /**
+     Swaps whichever indicator sits in `loadingContainer` for the branded
+     `PoweredByGiniLoadingIndicatorView` when `ingredientBrandScreens` includes
+     the Analysis screen. Brand always wins over both the standard indicator
+     and the integrator's `customLoadingIndicator`. No-op once installed.
+     */
+    private func installBrandedLoadingIndicatorIfNeeded() {
+        if poweredByGiniLoadingIndicatorView != nil { return }
+        guard let brandedIndicator = makeBrandedLoadingIndicatorIfEnabled() else { return }
+        poweredByGiniLoadingIndicatorView = brandedIndicator
+        brandedIndicator.accessibilityLabel = loadingIndicatorText.text
+        if let currentIndicator = loadingContainer.arrangedSubviews.first,
+           currentIndicator !== loadingIndicatorText {
+            loadingContainer.removeArrangedSubview(currentIndicator)
+            currentIndicator.removeFromSuperview()
+        }
+        loadingContainer.insertArrangedSubview(brandedIndicator, at: 0)
     }
 
     func layoutViews(centeringBy cameraFrame: UIView, on viewController: UIViewController) {
@@ -270,13 +223,8 @@ final class QRCodeOverlay: UIView {
     private func layoutCorrectQRCode(centeringBy cameraFrame: UIView, on viewController: UIViewController) {
         let correctQRCenterYAnchor = correctQRFeedback.centerYAnchor.constraint(equalTo: cameraFrame.topAnchor)
         correctQRCenterYAnchor.priority = .defaultLow
-        if isAccessibilityDeviceWithoutNotch && configuration.bottomNavigationBarEnabled {
-            // Use .required (1000) to strongly prevent vertical compression — keep correctQRFeedback fully visible
-            correctQRFeedback.setContentCompressionResistancePriority(.required, for: .vertical)
-        } else {
-            // Use .defaultHigh (750) to resist compression but allow it if space is tight
-            correctQRFeedback.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
-        }
+        // Use .defaultHigh (750) to resist compression but allow it if space is tight
+        correctQRFeedback.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
 
         NSLayoutConstraint.activate([
             correctQRFeedback.centerXAnchor.constraint(equalTo: cameraFrame.centerXAnchor),
@@ -380,6 +328,18 @@ final class QRCodeOverlay: UIView {
             checkMarkImageView.isHidden = true
             incorrectQRFeedback.isHidden = false
         }
+        addPoweredByGiniBadgeIfNeeded()
+        /// Badge is only shown on the dark full-overlay state; hidden on the clear background.
+        poweredByGiniBadgeView?.isHidden = !isQrCodeCorrect
+    }
+
+    /**
+     Adds the "Powered by Gini" badge when `ingredientBrandScreens` includes
+     the Analysis screen. No-op once added.
+     */
+    private func addPoweredByGiniBadgeIfNeeded() {
+        guard poweredByGiniBadgeView == nil else { return }
+        addPoweredByGiniBadgeIfEnabled()
     }
 
     func viewWillDisappear() {
@@ -396,12 +356,18 @@ final class QRCodeOverlay: UIView {
         if let educationViewModel {
             educationTask = Task { [weak self] in
                 await educationViewModel.start()
+                /// If the overlay was dismissed mid-animation (see `hideAnimation`),
+                /// the user did not actually see the message — do not flag it as shown.
+                guard !Task.isCancelled else { return }
                 self?.educationFlowController?.markMessageAsShown()
             }
             educationLoadingView?.isHidden = false
         } else {
+            installBrandedLoadingIndicatorIfNeeded()
             loadingContainer.isHidden = false
-            if let loadingIndicator = configuration.customLoadingIndicator {
+            if let brandedIndicator = poweredByGiniLoadingIndicatorView {
+                brandedIndicator.startAnimation()
+            } else if let loadingIndicator = configuration.customLoadingIndicator {
                 loadingIndicator.startAnimation()
             } else {
                 loadingIndicatorView.startAnimating()
@@ -414,30 +380,48 @@ final class QRCodeOverlay: UIView {
      */
     public func hideAnimation() {
         checkMarkImageView.isHidden = true
+        /// Cancel the education flow task so its trailing `markMessageAsShown()`
+        /// does not fire when the user dismisses the camera before the animation
+        /// finished — otherwise the message is silently marked as seen and the
+        /// user never gets it again.
+        educationTask?.cancel()
+        educationTask = nil
         if let educationLoadingView {
             educationLoadingView.isHidden = true
         } else {
             loadingContainer.isHidden = true
-            if let customIndicator = configuration.customLoadingIndicator {
+            if let brandedIndicator = poweredByGiniLoadingIndicatorView {
+                brandedIndicator.stopAnimation()
+            } else if let customIndicator = configuration.customLoadingIndicator {
                 customIndicator.stopAnimation()
             } else {
                 loadingIndicatorView.stopAnimating()
             }
         }
     }
-}
 
-private enum Constants {
-    static let spacing: CGFloat = 8
-    static let cornerRadius: CGFloat = 8
-    static let educationLoadingViewPadding: CGFloat = 28
-    static let educationLoadingViewTopPadding: CGFloat = 6
-    static let topSpacing: CGFloat = 2
-    static let expandedSpacing: CGFloat = 16
-    static let iconSize = CGSize(width: 56, height: 56)
-    static let educationLoadingHorizontalPadding: CGFloat = 56
-    static let stackViewMargins = UIEdgeInsets(top: expandedSpacing,
-                                               left: expandedSpacing,
-                                               bottom: expandedSpacing,
-                                               right: expandedSpacing)
+    private struct Constants {
+        static let spacing: CGFloat = 8
+        static let cornerRadius: CGFloat = 8
+        static let educationLoadingViewPadding: CGFloat = 28
+        static let educationLoadingViewTopPadding: CGFloat = 6
+        static let topSpacing: CGFloat = 2
+        static let expandedSpacing: CGFloat = 16
+        static let iconSize = CGSize(width: 56, height: 56)
+        static let educationLoadingHorizontalPadding: CGFloat = 56
+        static let stackViewMargins = UIEdgeInsets(top: expandedSpacing,
+                                                   left: expandedSpacing,
+                                                   bottom: expandedSpacing,
+                                                   right: expandedSpacing)
+        static let badgeBottomInset: CGFloat = 16
+    }
+
+    private struct Strings {
+        static let loadingIndicatorText = NSLocalizedStringPreferredFormat("ginicapture.QRscanning.loading",
+                                                                           comment: "Retrievenig invoice")
+    }
+
+    private struct Images {
+        static let checkMark = UIImageNamedPreferred(named: "greenCheckMark")
+    }
 }
